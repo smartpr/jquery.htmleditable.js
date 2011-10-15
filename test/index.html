@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--
+		IE8 runs 'intranet sites' in compatibility mode by default, which we
+		do not want as we are not aiming at IE7 support.
+		-->
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		
+		<title>jquery.htmleditable.js test suite</title>
+		
+		<link rel="stylesheet" type="text/css" href="lib/jasmine.css">
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script>
+		<script type="text/javascript" src="lib/jasmine.js"></script>
+		<script type="text/javascript" src="lib/jasmine-html.js"></script>
+		<script type="text/javascript" src="lib/jasmine-jquery.js"></script>
+		<script type="text/javascript" src="lib/jasmine-string.js"></script>
+		
+		<script type="text/javascript" src="../lib/rangy-core.js"></script>
+		<script type="text/javascript" src="../lib/rangy-selectionsaverestore.js"></script>
+		<script type="text/javascript" src="../lib/htmlparser.js"></script>
+		<script type="text/javascript" src="../lib/jquery.pluginify.js"></script>
+		<script type="text/javascript" src="../lib/core.js"></script>
+		<script type="text/javascript" src="../lib/base.js"></script>
+		<script type="text/javascript" src="../lib/multiline.js"></script>
+		<script type="text/javascript" src="../lib/singleline.js"></script>
+		<script type="text/javascript" src="../lib/bold.js"></script>
+		<script type="text/javascript" src="../lib/link.js"></script>
+<!--		<script type="text/javascript" src="../lib/list.js"></script>
+		<script type="text/javascript" src="../lib/margins.js"></script>-->
+	
+		<script type="text/javascript">
+			jasmine.getFixtures().fixturesPath = '.';
+			beforeEach(function() {
+				loadFixtures('fix.html');
+				window.fix = document.getElementById(jasmine.getFixtures().containerId);
+			});
+		</script>
+		<script type="text/javascript" src="lib/core.js"></script>
+	</head>
+	<body>
+		<h1><a href="../index.html">jquery.htmleditable.js</a> test suite</h1>
+		<script type="text/javascript">
+			jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+			jasmine.getEnv().execute();
+		</script>
+	</body>
+</html>
