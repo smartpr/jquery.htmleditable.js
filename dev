@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+# TODO: Remember process ids and kill running processes.
+
+# GitHub runs `jekyll --pygments --safe`.
+jekyll --auto --pygments --safe &
+compass watch . --poll --css-dir assets --sass-dir assets --images-dir assets &
