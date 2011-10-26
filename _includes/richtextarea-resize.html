@@ -1,0 +1,61 @@
+<style type="text/css">
+  html.gecko #richtextarea-resize > .editable {
+    outline: none;
+  }
+  #richtextarea-resize > .tools {
+    height: 0;
+    /*opacity: 0;*/
+    overflow-y: hidden;
+    margin-bottom: 5px;
+    -webkit-transition-property: height, opacity;
+    -webkit-transition-duration: 1s, .5s;
+    -webkit-transition-delay: .5s, 1.5s;
+  }
+  #richtextarea-resize > .tools.active {
+    height: 2em;
+    opacity: 1;
+  }
+  #richtextarea-resize > .tools [data-command].active {
+    font-weight: bold;
+  }
+  #richtextarea-resize > .editable {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    padding: .5em;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: inline-block;
+    width: 20em;
+    max-width: 90%;
+    height: 5em;
+    resize: both;
+  }
+  #richtextarea-resize > .editable > p:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<div id="richtextarea-resize">
+  <div class="tools">
+    <button data-command="bold">Bold</button>
+    <button data-command="link">Link</button>
+  </div>
+  <div class="editable">
+    <p>Yeah this was <strong>already</strong> in here...</p>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $('#richtextarea-resize > .editable').
+    on('focus blur', function(e) {
+      console.log(e.type, document.activeElement);
+      $('#richtextarea-resize > .tools')[(e.type === 'focus' ? 'add' : 'remove') + 'Class']('active');
+    }).
+    on('state', function(e, state) {
+      if ('bold' in state) {
+        $('#richtextarea-resize > .tools [data-command="bold"]')[(state.bold ? 'add' : 'remove') + 'Class']('active');
+      }
+    }).
+    htmleditable(['bold']);
+</script>

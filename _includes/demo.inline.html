@@ -1,0 +1,27 @@
+<style>
+  #demo-inline .inline {
+    outline: none;
+  }
+  #demo-inline:hover .inline {
+    background-color: LemonChiffon;
+  }
+  #demo-inline .inline:focus {
+    background-color: Yellow;
+  }
+</style>
+
+<div id="demo-inline">
+  You can blend in <span class="inline">editable areas</span> seamlessly
+  inside any content, including in <a href="http://smart.pr/">places where
+  <span class="inline">you might <strong>not</strong> be expecting</span>
+  them</a>. <em>Officially <span class="inline">amazing</span>, isn't it?!</em>
+  You can apply formatting as usual &ndash; try <kbd>⌘B</kbd> for bold.
+</div>
+
+<script>
+  $('#demo-inline .inline').
+    on('click', function(e) {
+      e.preventDefault();
+    }).
+    htmleditable(['singleline', 'bold']);
+</script>

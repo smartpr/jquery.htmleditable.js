@@ -1,0 +1,42 @@
+@import "compass/css3";
+@import "compass/reset/utilities";
+
+$line-gray: #eaeaea;
+
+html.gecko [contenteditable="true"] {
+	@include reset-focus;
+}
+
+// DEMO
+
+#preview {
+	& > h3 {
+		margin-top: 0;
+	}
+	& > .content {
+		padding: .5em;
+		@include border-radius;
+		border: {
+			top: 1px dashed $line-gray;
+			bottom: 1px dashed $line-gray;
+		}
+		overflow: {
+			x: auto;
+			y: auto;
+		}
+	}
+}
+
+#richtextinput-fixed, #richtextinput-autofit {
+	@include appearance(textfield);
+	padding: .5em;
+	overflow-x: auto;
+}
+
+#richtextinput-fixed {
+	white-space: nowrap;
+	overflow: {
+		x: hidden;
+		y: hidden;
+	}
+}

@@ -1,0 +1,4 @@
+repository: https://github.com/smartpr/jquery.htmleditable.js
+version: master
+pygments: true
+base_url: http://dev/jquery.htmleditable.js/_site

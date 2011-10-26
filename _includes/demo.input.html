@@ -1,0 +1,22 @@
+<style>
+  html.gecko #demo-input {
+    outline: none;
+  }
+  #demo-input {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    overflow-y: hidden;
+    min-width: 20em;
+    padding: .3em;
+    display: inline-block;
+  }
+</style>
+
+<div id="demo-input">
+  Yeah this was <strong>already</strong> in here...
+</div>
+
+<script>
+  $('#demo-input').htmleditable(['singleline', 'bold']);
+</script>

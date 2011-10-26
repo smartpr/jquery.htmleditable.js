@@ -1,0 +1,67 @@
+---
+layout: base
+---
+
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/rangy-core.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/rangy-selectionsaverestore.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/htmlparser.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/jquery.pluginify.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/core.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/base.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/multiline.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/singleline.js"></script>
+<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/bold.js"></script>
+
+<aside id="preview">
+	<h3>Live preview</h3>
+	<div class="content"></div>
+</aside>
+
+<article>
+	{{ content }}
+</article>
+
+<script>
+	
+	jQuery(function($) {
+		
+		// Update the live preview.
+
+		$(':htmleditable').on('focus change', function() {
+			$('#preview > .content').html($(this).htmleditable('value'));
+		});
+
+		// Make the live preview always be within the viewport.
+
+		// TODO: max-height for both $content and $sticky.
+
+		var $content = $('#preview > .content'),
+			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight(),
+			$sticky = $content.clone().css({
+				position: 'fixed',
+				top: spacing,
+				left: $content.offset().left,
+				width: $content.width()
+			}).hide().insertAfter($content);
+		
+		$(window).
+			on('scroll', function() {
+				var isStickyNeeded = $content.offset().top - $(document).scrollTop() <= spacing;
+				if ($sticky.is(':visible') !== isStickyNeeded) {
+					$sticky[isStickyNeeded ? 'show' : 'hide']();
+					$content.css('visibility', isStickyNeeded ? 'hidden' : '');
+				}
+			}).
+			on('resize', function() {
+				// Is being called when zooming as well.
+				// TODO: That is, in Chrome. Other browsers?
+				$sticky.css({
+					left: $content.offset().left,
+					width: $content.width()
+				});
+			});
+	
+	});
+
+</script>

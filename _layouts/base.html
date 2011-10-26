@@ -1,10 +1,85 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<!--
+		IE8 runs 'intranet sites' in compatibility mode by default, which we
+		do not want as we are not aiming at IE7 support.
+		-->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
 		<title>jquery.htmleditable.js</title>
+
+		<!--
+		We need jQuery at this stage because `jquery.browser.min.js` depends on
+		it.
+		-->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7b2.js"></script>
+		<!--
+		Load these environment checkers before any style sheets because styling
+		may be based on classes that are set by the checkers. If we would load
+		the checkers at a later stage everything would still work in the sense
+		that the page ends up in the same state, but it may not be desirable.
+		For example; imagine that we want to block a part of the interface in
+		case the environment does not meet certain criteria. In scenarios like
+		that we would like to have a guarantee that this piece of interface is
+		*never* displayed, not even briefly.
+		-->
+		<script type="text/javascript" src="{{ site.base_url }}/assets/jquery.browser.min.js"></script>
+		<script type="text/javascript" src="{{ site.base_url }}/assets/modernizr.js"></script>
+		<!--
+		TODO: Styling before any content, yet it looks like Firefox is building
+		the document before the styling has been applied. The result is a flash
+		of unstyled content. Hmm, how can we prevent this?
+		-->
+		<!-- <link class="theme" rel="stylesheet" type="text/css" href="http://projects.smart.pr/project-site.themes/smartpr-oss.css" /> -->
+		<link class="theme" rel="stylesheet" type="text/css" href="http://dev/project-site.themes/smartpr-oss.css" />
+		<link rel="stylesheet" type="text/css" href="{{ site.base_url }}/assets/site.css" />
 	</head>
 	<body>
-		<h1>jquery.htmleditable.js</h1>
-		{{ content }}
+		<header>
+			<h1>jquery.htmleditable.js <span class="version">v{{ site.version }}</span></h1>
+			<h2>contenteditable’s missing API</h2>
+		</header>
+		
+		<nav>
+			<a href="{{ site.base_url }}/index.html"{% if page.url == '/index.html' %} class="selected"{% endif %}>overview</a>
+			<a href="{{ site.base_url }}/demo.html"{% if page.url == '/demo.html' %} class="selected"{% endif %}>demo</a>
+			<a href="{{ site.repository }}/raw/{{ site.version }}/jquery.htmleditable.standalone.min.js">download</a>
+			<a href="{{ site.base_url }}/doc/index.html">documentation</a>
+			<a href="{{ site.base_url }}/test.html">tests</a>
+			<a href="{{ site.repository }}">development</a>
+		</nav>
+
+		<section>
+			{{ content }}
+		</section>
+
+		<footer>
+			<p>
+				Made with <span class="love">&hearts;</span> by
+				<a href="http://twitter.com/timmolendijk">Tim Molendijk</a>
+			</p>
+			<button class="no-theme">Disable Theme</button>
+		</footer>
+		<script type="text/javascript">
+			
+			$('footer .no-theme').on('click', function() {
+				$('[type="text/css"].theme').add(this).remove();
+			});
+
+		</script>
+
+		<script type="text/javascript">
+			var clicky_site_ids = clicky_site_ids || [];
+			clicky_site_ids.push(66488240);
+			(function() {
+				var s = document.createElement('script');
+				s.type = 'text/javascript';
+				s.async = true;
+				s.src = '//static.getclicky.com/js';
+				document.getElementsByTagName('head')[0].appendChild(s);
+			})();
+		</script>
 	</body>
 </html>

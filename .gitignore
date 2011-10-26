@@ -2,4 +2,6 @@
 *.tmproj
 *.swp
 *.orig
+.sass-cache/
 _site/
+dev

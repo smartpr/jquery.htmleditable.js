@@ -1,0 +1,31 @@
+<style>
+  html.gecko #demo-area {
+    outline: none;
+  }
+  #demo-area {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    /* Enable scrollbars when necessary. */
+    overflow-x: auto;
+    overflow-y: auto;
+    /* Like `textarea`'s default behavior, make it resizable in both
+       dimensions (if supported by the browser). */
+    resize: both;
+    /* Give it some initial size below which it will not be resizable. */
+    width: 20em;
+    height: 5em;
+    padding: .5em;
+  }
+  #demo-area > p:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<div id="demo-area">
+  <p>Yeah this was <strong>already</strong> in here...</p>
+</div>
+
+<script>
+  $('#demo-area').htmleditable(['bold']);
+</script>
