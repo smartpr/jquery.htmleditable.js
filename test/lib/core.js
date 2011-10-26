@@ -13,18 +13,29 @@
         expect($elem.htmleditable('init').get()).toEqual($elem.get());
         return expect($elem).toBe(':htmleditable');
       });
-      return it("implicitly", function() {
+      it("implicitly", function() {
         expect($elem.htmleditable().get()).toEqual($elem.get());
         return expect($elem).toBe(':htmleditable');
+      });
+      return it("cancels features that are invalidated by later features", function() {
+        spyOn($.htmleditable.multiline, 'init');
+        $elem.htmleditable(['singleline']);
+        return expect($.htmleditable.multiline.init).not.toHaveBeenCalled();
       });
     });
     describe("value", function() {
       it("gets clean content", function() {
         return expect($.trim($elem.htmleditable().htmleditable('value'))).toBe("Initial content!");
       });
-      return it("sets clean content", function() {
+      it("sets clean content", function() {
         $elem.htmleditable().htmleditable('value', 'Scrutiny is <strong>strong</strong>!');
         return expect($.trim($elem[0].innerHTML)).toBe('Scrutiny is strong!');
+      });
+      return it("sets content that will be cleaned based on the right instance's features", function() {
+        var $elem2;
+        $elem.htmleditable();
+        ($elem2 = $('#uneditable', fix)).htmleditable(['bold']).html('this editable <strong>allows</strong> bold');
+        return expect($elem2.htmleditable('value')).toBe('this editable <strong>allows</strong> bold');
       });
     });
     describe("selection", function() {

@@ -33,11 +33,11 @@ $.htmleditable.bold =
 		# TODO: Hmm, very strictly speaking, this is not (necessarily) part of
 		# the feature. It's similar to the event handler that binds a click on
 		# some tool button to the invocation of a command.
-		# @bind('keydown', 'ctrl+b meta+b', (e) =>
-		# 	e.preventDefault()
-		# 	e.stopPropagation()
-		# 	@htmleditable 'command', 'bold'
-		# )
+		@bind('keydown', 'ctrl+b meta+b', (e) =>
+			e.preventDefault()
+			e.stopPropagation()
+			@htmleditable 'command', 'bold'
+		)
 	context:
 		get: (selection) ->
 			return null unless selection?

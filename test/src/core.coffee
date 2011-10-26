@@ -22,6 +22,11 @@ describe "$.fn.htmleditable()", ->
 			expect($elem).toBe ':htmleditable'
 		
 		# TODO: Test with features, syntax similar to 'state'.
+
+		it "cancels features that are invalidated by later features", ->
+			spyOn $.htmleditable.multiline, 'init'
+			$elem.htmleditable ['singleline']
+			expect($.htmleditable.multiline.init).not.toHaveBeenCalled()
 	
 	describe "value", ->
 
@@ -33,6 +38,17 @@ describe "$.fn.htmleditable()", ->
 			$elem.htmleditable().htmleditable 'value', 'Scrutiny is <strong>strong</strong>!'
 			# Using `innerHTML` bypasses `$.fn.html`.
 			expect($.trim $elem[0].innerHTML).toBe 'Scrutiny is strong!'
+		
+		it "sets content that will be cleaned based on the right instance's features", ->
+			$elem.htmleditable()
+			($elem2 = $ '#uneditable', fix).
+				htmleditable(['bold']).
+				html 'this editable <strong>allows</strong> bold'
+			
+			# What we are verifying here is that the content that we just put
+			# in has not been cleaned based on the first instance's feature
+			# set.
+			expect($elem2.htmleditable 'value').toBe 'this editable <strong>allows</strong> bold'
 	
 	describe "selection", ->
 
