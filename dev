@@ -1,7 +1,21 @@
 #!/usr/bin/env sh
 
-# TODO: Remember process ids and kill running processes.
+# Keep track of pids of launched processes so we can keep the house clean.
+PIDS_FILE=`dirname $0`/.dev.pids
 
-# GitHub runs `jekyll --pygments --safe`.
-jekyll --auto --pygments --safe &
-compass watch . --poll --css-dir assets --sass-dir assets --images-dir assets &
+case $1 in
+stop)
+	# Kill all processes that were spawned the last time this script executed.
+	if [ -f $PIDS_FILE ]; then
+		kill -KILL `cat $PIDS_FILE`
+		rm $PIDS_FILE
+	fi
+	;;
+*)
+	# GitHub runs `jekyll --pygments --safe`.
+	jekyll --auto --pygments --safe &
+	echo $! >> $PIDS_FILE
+	compass watch . --poll --css-dir assets --sass-dir assets --images-dir assets &
+	echo $! >> $PIDS_FILE
+	;;
+esac
