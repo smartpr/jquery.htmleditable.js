@@ -5,7 +5,7 @@
     return $elem = $('#editable', fix);
   });
   describe("$.htmleditable.link", function() {
-    return it("updates link target according to link text change if text is target", function() {
+    return xit("updates link target according to link text change if text is target", function() {
       var $link;
       $elem.htmleditable(['link']).htmleditable('value', 'This is a link: <a href="http://smart.pr/">http://smart.pr/</a> and this is not');
       ($link = $elem.find('a')).html("" + ($link.html()) + "#aboutus");

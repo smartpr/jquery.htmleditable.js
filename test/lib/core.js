@@ -34,7 +34,7 @@
       return it("sets content that will be cleaned based on the right instance's features", function() {
         var $elem2;
         $elem.htmleditable();
-        ($elem2 = $('#uneditable', fix)).htmleditable(['bold']).html('this editable <strong>allows</strong> bold');
+        ($elem2 = $('#settings', fix)).htmleditable(['bold']).html('this editable <strong>allows</strong> bold');
         return expect($elem2.htmleditable('value')).toBe('this editable <strong>allows</strong> bold');
       });
     });
@@ -100,7 +100,7 @@
         $elem.htmleditable(['bold']);
         return expect($elem.htmleditable('state', 'bold')).toBeNull();
       });
-      return it("updates on keydown, reflecting the state that takes effect only after its handlers executed", function() {
+      it("updates on keydown, reflecting the state that takes effect only after its handlers executed", function() {
         runs(function() {
           var range;
           $elem.htmleditable(['bold']).focus().trigger('keydown');
@@ -113,6 +113,23 @@
         return runs(function() {
           return expect($elem.htmleditable('state', 'bold')).toBe(true);
         });
+      });
+      it("sets content-level state settings for features that desire so", function() {
+        var val;
+        val = $elem.htmleditable(['margins']).htmleditable('value');
+        return expect(val.indexOf("<!--htmleditable:state \"margins\":" + ($elem.htmleditable('state', 'margins')) + " -->")).not.toBe(-1);
+      });
+      it("gets state according to content-level settings where applicable", function() {
+        $elem.htmleditable(['margins']);
+        expect($elem.htmleditable('state', 'margins')).toBe(false);
+        $elem.htmleditable('value', '	[noise]	<!--htmleditable:state "margins": true --><strong>content</strong>bla');
+        return expect($elem.htmleditable('state', 'margins')).toBe(true);
+      });
+      return it("never leaves any content-level settings linger at edit-time", function() {
+        ($elem = $('#settings', fix)).htmleditable(['margins']);
+        expect($elem[0].innerHTML.indexOf('<!--htmleditable:state')).toBe(-1);
+        $elem.htmleditable('value', 'bla<!--htmleditable:state "margins":false -->bla');
+        return expect($elem[0].innerHTML).toBe('blabla');
       });
     });
     return describe("command", function() {

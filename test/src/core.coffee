@@ -1,6 +1,7 @@
 # TODO:
 # * Specify features that do not exist.
 # * Test `$.fn.val` as an addendum to testing `$.fn.html` (or vice versa).
+# * Test features' `input` and `output`.
 
 $elem = undefined
 beforeEach -> $elem = $ '#editable', fix
@@ -41,7 +42,7 @@ describe "$.fn.htmleditable()", ->
 		
 		it "sets content that will be cleaned based on the right instance's features", ->
 			$elem.htmleditable()
-			($elem2 = $ '#uneditable', fix).
+			($elem2 = $ '#settings', fix).
 				htmleditable(['bold']).
 				html 'this editable <strong>allows</strong> bold'
 			
@@ -132,6 +133,33 @@ describe "$.fn.htmleditable()", ->
 			runs ->
 				expect($elem.htmleditable 'state', 'bold').toBe yes
 		
+		# TODO: This stuff doesn't really belong under `state` I think.
+
+		it "sets content-level state settings for features that desire so", ->
+			val = $elem.htmleditable(['margins']).htmleditable 'value'
+			expect(val.indexOf "<!--htmleditable:state \"margins\":#{ $elem.htmleditable 'state', 'margins' } -->").not.toBe -1
+		
+		# TODO: Test using `#settings`.
+		it "gets state according to content-level settings where applicable", ->
+			$elem.htmleditable ['margins']
+			# Make sure current state is different from new state that will be
+			# assigned via content-level setting.
+			expect($elem.htmleditable 'state', 'margins').toBe no
+
+			$elem.htmleditable 'value', '	[noise]	<!--htmleditable:state "margins": true --><strong>content</strong>bla'
+			expect($elem.htmleditable 'state', 'margins').toBe yes
+		
+		it "never leaves any content-level settings linger at edit-time", ->
+			($elem = $ '#settings', fix).htmleditable ['margins']
+			expect($elem[0].innerHTML.indexOf '<!--htmleditable:state').toBe -1
+
+			$elem.htmleditable 'value', 'bla<!--htmleditable:state "margins":false -->bla'
+			expect($elem[0].innerHTML).toBe 'blabla'
+		
+		# TODO: Test that settings of features that do not do content-level
+		# settings or of non-existent features will be ignored and not put on
+		# state object.
+
 	describe "command", ->
 
 		it "invokes a feature command", ->

@@ -14,20 +14,26 @@ $.htmleditable.margins =
 				'margin-top': 0
 				'margin-bottom': 0
 	init: ->
-		$('head').append "<style type=\"text/css\">
+		# TODO: Shouldn't we keep track of this element, so that we make sure
+		# we do not append it twice in some edge case scenarios? If an instance
+		# is removed (because the element gets removed), style should ideally
+		# disappear with it.
+		$('head').append "<style>
 			##{ @prop 'id' }.no-margins p, ##{ @prop 'id' }.no-margins ul, ##{ @prop 'id' }.no-margins ol {
 				margin-top: 0;
 				margin-bottom: 0;
 			}
 		</style>"
 		@bind 'state', (e, state) =>
+			# TODO: Make a (very simple) stand-alone plugin to make this type
+			# of toggle more concise? I am doing this all over the place.
 			@["#{ if state.margins is yes then 'remove' else 'add' }Class"] 'no-margins' if 'margins' of state
-		@htmleditable 'command', 'margins', no if @htmleditable('state', 'margins') is null
+		# TODO: We could get rid of this and just depend on `context.get` to
+		# make sure that a state will be set.
+		# @htmleditable 'command', 'margins', no if @htmleditable('state', 'margins') is undefined
 	content: yes
-	context:
-		# TODO: This function is really a means of setting the internal state,
-		# which is optional to allow for features that want to play via the
-		# browser (and get their state change via the `get` function). Can't
-		# we think of better naming to reflect this idea?
-		set: (selection, margins) ->
-			margins ? not @htmleditable 'state', 'margins'
+
+	# TODO: Here we basically define an initial state value -- we can choose to
+	# introduce a separate property for that.
+	state: ->
+		@htmleditable('state', 'margins') ? no

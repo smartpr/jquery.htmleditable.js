@@ -4,9 +4,9 @@ beforeEach -> $elem = $ '#editable', fix
 describe "$.htmleditable.bold", ->
 
 	it "defines hotkeys", ->
-		spyOn $.htmleditable.bold.context, 'set'
+		spyOn $.htmleditable.bold, 'command'
 		$elem.htmleditable ['bold']
-		
+
 		# Just `b` -- should not trigger command.
 		$elem.trigger
 			type: 'keydown'
@@ -35,4 +35,4 @@ describe "$.htmleditable.bold", ->
 			metaKey: yes
 			shiftKey: no
 		
-		expect($.htmleditable.bold.context.set.callCount).toBe 2
+		expect($.htmleditable.bold.command.callCount).toBe 2

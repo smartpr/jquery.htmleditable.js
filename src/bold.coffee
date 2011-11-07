@@ -1,47 +1,53 @@
 $ = jQuery
 
-tag = 'b'
-$testbed = $()
-getTestbed = ->
-	unless $testbed.length is 1
-		$testbed = $('<div contenteditable="true" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo 'body'
-	$testbed
-$ ->
-	# TODO: This is in the incorrect place, as it will be executed before the
-	# editor is initialized (which does stuff like setting `styleWithCSS`).
-	$testbed = getTestbed()
-	# TODO: Bring all the rangy-related stuff behind a simple `htmleditable`-level
-	# API.
-	rangy.init()
+name = undefined
+tag = ->
+	return name if name?
+
+	$testbed = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo 'body'
 	range = rangy.createRange()
 	range.selectNodeContents $testbed[0]
 	rangy.getSelection().setSingleRange range
-	$testbed.focus()
 	document.execCommand 'bold', null, null
-	tag = $testbed.children()[0].nodeName
+	name = $testbed.children()[0].nodeName
 	$testbed.remove()
 
+	name ? 'b'
+
 $.htmleditable.bold =
-	allow: ->
-		# TODO: What about `@is 'b'` with `$(tag).is 'strong'`?
-		return yes if @is tag
-		return document.createElement tag if @is 'strong'
-		return ((element, remove) -> $(element).contents().wrapAll "<#{ tag } />" if remove) if @is ':header'
+	
+	element: (element) ->
+		return if @length is 0 or element?
+
+		if @is 'strong, b'
+			return document.createElement tag()
+		
+		if @is ':header'
+			return (element, children) ->
+				return if element?
+
+				# Wrap contents of `children` in a bold tag.
+				bold = document.createElement tag()
+				while children.firstChild?
+					bold.appendChild children.firstChild
+				children.appendChild bold
+
+				return
+
+		return
+
+	# TODO: Probably nicer to pass `$tree` as `@`.
 	output: ($tree) ->
-		$tree.find(tag).domSplice '<strong />'
-	init: ->
-		# TODO: Hmm, very strictly speaking, this is not (necessarily) part of
-		# the feature. It's similar to the event handler that binds a click on
-		# some tool button to the invocation of a command.
-		@bind('keydown', 'ctrl+b meta+b', (e) =>
-			e.preventDefault()
-			e.stopPropagation()
-			@htmleditable 'command', 'bold'
-		)
-	context:
-		get: (selection) ->
-			return null unless selection?
-			document.queryCommandState 'bold'
-		set: ->
-			document.execCommand 'bold', null, null
-			return
+		$tree.find(tag()).domSplice '<strong />'
+	
+	state: ->
+		# TODO: Isn't `@` a jQuery object already?
+		return null unless $(@).htmleditable('selection')?
+		document.queryCommandState 'bold'
+	
+	# TODO: Allow for short-cut notation like `hotkeys: 'ctrl+b meta+b'`
+	hotkeys:
+		'ctrl+b meta+b': []
+	
+	command: ->
+		document.execCommand 'bold', null, null

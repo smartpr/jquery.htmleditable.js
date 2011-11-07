@@ -12,7 +12,8 @@
 		
 		<link rel="stylesheet" type="text/css" href="lib/jasmine.css">
 
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7b2.js"></script>
+		<!-- // <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script> -->
 		<script type="text/javascript" src="lib/jasmine.js"></script>
 		<script type="text/javascript" src="lib/jasmine-html.js"></script>
 		<script type="text/javascript" src="lib/jasmine-jquery.js"></script>
@@ -29,13 +30,13 @@
 		<script type="text/javascript" src="../lib/singleline.js"></script>
 		<script type="text/javascript" src="../lib/bold.js"></script>
 		<script type="text/javascript" src="../lib/link.js"></script>
-<!--		<script type="text/javascript" src="../lib/list.js"></script>
-		<script type="text/javascript" src="../lib/margins.js"></script>-->
+<!--		<script type="text/javascript" src="../lib/list.js"></script>-->
+		<script type="text/javascript" src="../lib/margins.js"></script>
 	
 		<script type="text/javascript">
 			jasmine.getFixtures().fixturesPath = '.';
 			beforeEach(function() {
-				loadFixtures('fix.html');
+				loadFixtures('fixtures.html');
 				window.fix = document.getElementById(jasmine.getFixtures().containerId);
 			});
 		</script>
@@ -43,11 +44,14 @@
 		<script type="text/javascript" src="lib/multiline.js"></script>
 		<script type="text/javascript" src="lib/bold.js"></script>
 		<script type="text/javascript" src="lib/link.js"></script>
+		<script type="text/javascript" src="lib/margins.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
-			jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-			jasmine.getEnv().execute();
+			jQuery(function() {
+				jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+				jasmine.getEnv().execute();
+			});
 		</script>
 	</body>
 </html>

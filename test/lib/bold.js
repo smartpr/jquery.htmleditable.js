@@ -6,7 +6,7 @@
   });
   describe("$.htmleditable.bold", function() {
     return it("defines hotkeys", function() {
-      spyOn($.htmleditable.bold.context, 'set');
+      spyOn($.htmleditable.bold, 'command');
       $elem.htmleditable(['bold']);
       $elem.trigger({
         type: 'keydown',
@@ -35,7 +35,7 @@
         metaKey: true,
         shiftKey: false
       });
-      return expect($.htmleditable.bold.context.set.callCount).toBe(2);
+      return expect($.htmleditable.bold.command.callCount).toBe(2);
     });
   });
 }).call(this);

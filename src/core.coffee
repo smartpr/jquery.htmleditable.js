@@ -1,220 +1,30 @@
-###*
+'use strict';
 
-# core
-
-The core editor *engine* jQuery plugin.
-
-###
-
-# TODO: Good idea?
-"use strict";
-
-# TODO: Make `$` a `jQuery.sub()`, so we have both a public and a private
-# jQuery environment to extend. Tricky part is to do this at the right moment,
-# because extensions to `jQuery` beyond this point will not be part of `$`.
-$ = jQuery
+$ = jQuery.sub()
 
 # Note that returning anything other than `no` means that the element will be
 # included in the selection.
-$.expr[':'].htmleditable = (el) ->
+jQuery.expr[':'].htmleditable = (el) ->
 	$el = $(el)
 	$el.is('[contenteditable="true"]') and $el.data('htmleditable')?
 
-# TODO: Use some more meaningful name instead of `overriddenHtml`. Something
-# that carries the idea of not entailing all the cleaning magic. Also; put it
-# on `$.fn`.
-# Perhaps it would be a good idea to keep `$.fn.html` as it is internally, and
-# use a different name for the overridden version with all the cleaning magic.
-# Then, on the public jQuery environment, put the overridden version on
-# `$.fn.html`.
-overriddenHtml = $.fn.html
-$.fn.html = (html) ->
-	# Retrieving the value of the `$rinsebin` should always involve cleaning
-	# it, so that cleaning HTML is just a matter of dropping it in there and we
-	# are done.
-	if @[0] is getRinsebin()[0] and not html?
+$.fn.originalHtml = $.fn.html
+jQuery.fn.html = ->
+	return @htmleditable 'value', arguments... if @eq(0).is ':htmleditable'
+	# A tricky consequence of our setup with `$` being a `jQuery.sub()` is the
+	# fact that we *have* to wrap `@` in `$` here, even though `@` is an
+	# instance of `jQuery`. This fact, and that it is therefore *not* an
+	# instance of `$` is precisely the reason why.
+	$(@).originalHtml arguments...
 
-		# Take current contents of the `$rinsebin`, generate a clean DOM tree
-		# from it and put it back in the bin.
-
-		html = overriddenHtml.call @
-
-		# TODO: How to obtain the features from this call on `$rinsebin`?
-		$editable = $ ':htmleditable:first'
-		features = $editable.data('htmleditable').features
-
-		# Incoming cleaning.
-
-		for name, feature of features
-			# TODO: We can replace `feature?.input` with `feature.input`(?)
-			result = feature?.input?.call $editable, html
-			html = result if typeof result is 'string'
-		
-		$decoder = $ '<div />'
-		cursor = @empty()[0]
-		process = []
-		HTMLParser html,
-			start: (name, attrs, empty) ->
-				try
-					element = document.createElement name
-				catch err
-
-				return unless element
-
-				$element = $ element
-				element = undefined
-				elementProcess = []
-				for name, feature of features
-					result = feature?.allow?.call $element, attrs
-					if $.isFunction result
-						elementProcess.push result
-					else unless element
-						element = $element[0] if result is yes
-						element = result if result?.nodeType is 1
-				
-				if elementProcess.length > 0
-					remove = not element?
-					element ?= $element[0]
-					process.push [element, elementProcess, remove]
-				
-				return unless element
-
-				cursor.appendChild element
-				cursor = element unless element.nodeName of empty
-				yes
-			end: (name) ->
-				cursor = cursor.parentNode
-			chars: (text) ->
-				cursor.appendChild document.createTextNode $decoder.html(text).text()
-		
-		for [element, elementProcess, remove] in process
-			forceRemove = no
-			for p in elementProcess
-				forceRemove = forceRemove or p.call(@, element, remove) is yes
-			$(element).domSplice() if forceRemove or remove
-
-		return overriddenHtml.call @
-
-	if @eq(0).is ':htmleditable'
-
-		return @data('htmleditable').value unless html?
-		
-		# We are setting a new value into the htmleditable field. Before we can
-		# do so we must check if the new content defines some state settings,
-		# after which we have to make sure that the content is clean.
-
-		html = html.replace /^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, (match, before, settings, after) =>
-			features = @data('htmleditable').features
-			for name, value of $.parseJSON "{ #{ settings } }"
-				if features[name]?.content is yes
-					@htmleditable 'command', name, value
-			before + after
-		
-		# Passing content through the `$rinsebin` will clean it.
-		html = getRinsebin().html(html).html()
-		getRinsebin().empty()
-
-		# `html` is now clean and ready for editing.
-		result = overriddenHtml.call @, html
-		updateValue.call @[0]
-
-		return result
-	
-	overriddenHtml.call @, html
-
-# TODO: This can be a rather heavy function, so we either have to make sure
-# that it is not invoked too frequently, or we have to make it more light-
-# weight by only running the cleaning part if there is a chance that it will
-# actually result in a changed value.
-window.updateValue = ->
-	# TODO: This is experimental -- should probably go into a feature, which in
-	# turn would rely on an external plugin that is capable of doing something
-	# similar for any input element? Or maybe it should not be part of
-	# htmleditable at all -- just an external plugin that puts some `valHooks`
-	# in place? Or, then one could argue why not leaving prettification up to
-	# the renderer (dataview and the likes) -- it would keep the data
-	# unmodified from what the user entered (prettify is a no-way-back-type-of-
-	# operation)
-	# jsprettif.y.prettify()
-
-	data = $(@).data 'htmleditable'
-	# Clone the htmleditable node tree because it should remain unmodified at
-	# all times, but do so without copying data so that `:htmleditable` will no
-	# longer hold -- which is the desired behavior because we do not want
-	# `jQuery.fn.html` to perform its cleaning magic on the cloned content.
-	$current = $(@).clone no, no
-
-	# Outgoing cleaning.
-
-	settings = {}
-	for name, feature of data.features
-		feature.output?.call $(@), $current
-		if feature.content is yes
-			# TODO: Escape any occurences of `-->` (or `--`?)
-			settings[name] = $(@).htmleditable 'state', name
-	
-	current = $current.html()
-	unless $.isPlainObject settings
-		# TODO: Has `JSON.stringify` the browser support we need?
-		settings = JSON.stringify settings
-		current = "<!--htmleditable:state #{ settings[1...settings.length - 1] } -->#{ current }"
-
-	unless data.value is current
-		data.value = current
-		$(@).change()
-
-getState = (inactive) ->
-	selection = $(@).htmleditable 'selection'
-	state = {}
-	for name, feature of $(@).data('htmleditable').features
-		featureState = feature?.context?.get?.call $(@), selection
-		if featureState isnt undefined
-			unless $.isPlainObject featureState
-				value = featureState
-				(featureState = {})[name] = value
-			$.extend state, featureState
-	# if inactive
-	# 	# TODO: Wouldn't it be better to use `undefined` for initial/
-	# 	# inactive state? This value is already excluded from being used as
-	# 	# state value because it is indistinguishable from "no state" as
-	# 	# used by feature functions such as `context.set`.
-	# 	for key of state
-	# 		state[key] = null
-	state
-
-# A slightly more appropriate name would be `updateStateFromContext`, as it
-# will only try to update state for those features that get their state from
-# context.
-updateState = ->
-	# Something happened that may have changed any of the
-	# features's state.
-	# Using `activeElement` to determine if the state should be active or not
-	# is not a good idea because why not just leave this up to
-	# `htmleditable('selection')` which is supposed to find out if an active
-	# state can be given.
-	setState.call @, getState.call @, document.activeElement isnt @
-
-setState = (state) ->
-	data = $(@).data 'htmleditable'
-	data.state ?= {}
-	
-	delta = {}
-	for key, value of state
-		unless data.state[key] is value
-			data.state[key] = value
-			delta[key] = value
-	
-	$(@).trigger('state', delta) unless $.isEmptyObject delta
-
-$rinsebin = $()
-getRinsebin = ->
-	unless $rinsebin.length is 1
-		$rinsebin = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;" />').prependTo 'body'
-	$rinsebin
-
-$.fn.htmleditable = $.pluginify
+jQuery.fn.htmleditable = $.pluginify
 	
 	init: (features) ->
+		# Document must be ready before initialization because we need to be
+		# capable of setting `styleWithCSS` to `no` before we can reliably let
+		# people use it.
+		$.error "Initialization of htmleditable is not possible before the document is ready. Have you placed your code in a 'ready' handler?" unless jQuery.isReady
+
 		return @ if $(@).closest(':htmleditable').length > 0 or $(@).parents('[contenteditable="true"]').length > 0
 		
 		# TODO: Is this [really necessary](http://code.google.com/p/rangy/wiki/
@@ -222,10 +32,12 @@ $.fn.htmleditable = $.pluginify
 		rangy.init()
 
 		# TODO: Filter out duplicates.
-		features = $.merge ['base', 'multiline'], features ? []
+		# TODO: Have a dedicated argument for line mode, of which `native` is
+		# the default value.
+		features = $.merge ['base', 'linebreaks'], features ? []
 		load = $.merge [], features
 		for feature in features
-			for condition in $.htmleditable[feature]?.condition ? []
+			for condition in jQuery.htmleditable[feature]?.condition ? []
 				if condition[0] is '-'
 					shouldBeIncluded = no
 					condition = condition[1..]
@@ -239,7 +51,7 @@ $.fn.htmleditable = $.pluginify
 					break
 		features = {}
 		for l in load
-			features[l] = $.htmleditable[l]
+			features[l] = jQuery.htmleditable[l]
 
 		$(@).
 			data('htmleditable',
@@ -249,42 +61,112 @@ $.fn.htmleditable = $.pluginify
 			bind('paste', (e) ->
 				selection = rangy.saveSelection()
 				getRinsebin().focus()
+				# TODO: In IE `script` and `style` elements are not stripped
+				# from the pasted content, which results in the scripts being
+				# executed and the styling being applied (for a brief instance,
+				# until the `$rinsebin` is emptied). Other editors such as
+				# TinyMCE do not suffer from this problem -- how do they do
+				# this? Ideally we would just strip scripts and styling from
+				# the content before it ends up in the `$rinsebin`, but that
+				# would require access to the clipboard. This is possible in
+				# IE, but only as plain text as far as I know.
+				# Update: not sure if scripts are stripped, pretty sure that
+				# styling is not part of the pasted content.
+				# One potential solution could be to use an `iframe` for the
+				# `$rinsebin`, but that will probably have complications in
+				# other areas, so we should experiment with that before going
+				# that route.
 				# TODO: Is the try-catch block truly necessary here?
 				try e.preventDefault() unless document.execCommand('Paste') is no catch err
 				setTimeout =>
 					$(@).focus()
-					rangy.restoreSelection selection
+
+					cleaned = cleanTree.call $(@), getRinsebin()[0]
+					getRinsebin().empty().append cleaned
 					html = getRinsebin().html()
+					getRinsebin().empty()
+
+					rangy.restoreSelection selection
 					try
 						document.execCommand 'insertHTML', undefined, html
 					catch err
 						document.selection.createRange().pasteHTML html
-					getRinsebin().empty()
+					# We don't have to manually update the instance's value
+					# here because the paste will be notified by
+					# `$.event.special.val`, which in turn results in the value
+					# being updated per the handler below.
+					# TODO: Previous description is from the future.
+					# TODO: Note that this code is in a `setTimeout`, which
+					# means that any paste handlers will be executed before
+					# the value is up-to-date.
 			).
-			bind('focus', ->
-				try document.execCommand 'styleWithCSS', undefined, no catch err
+			bind('input', ->
+				$(@).updateValue()
 			).
-			bind('input', updateValue).
-			bind('change mouseup focus blur', updateState).
-			bind('keydown', -> setTimeout => updateState.call @)
+			bind('change mouseup touchend focus blur', ->
+				$(@).updateState()
+			).
+			bind('keydown', -> setTimeout =>
+				$(@).updateState()
+				# TODO: This is a temporary work-around the fact that IE
+				# doesn't trigger `input` (on contenteditable).
+				# $(@).updateValue()
+			)
 		
-		# Make sure every feature has a state, so `updateValue` can be run.
-		setState.call @, getState.call @, true
+		# For some crazy reason the following line cannot be placed outside
+		# this method in a `ready` handler of its own, because it will throw
+		# an exception as if the document isn't ready yet. (We're talking
+		# Firefox here.)
+		try document.execCommand 'styleWithCSS', undefined, no catch err
 		
-		# Clean initial content before `updateValue` is called -- doing so will
-		# invoke `updateValue` eventually. By setting a value using `$.fn.val`
-		# we automatically clean it.
-		# TODO: Use `$(@).val`.
-		$(@).html overriddenHtml.call $(@)
+		# Initialize a state for every feature.
+		$(@).updateState()
+		
+		# Clean the initial content.
+		# TODO: We might want to prevent a `change` event from being triggered
+		# as a result of this action, because this is not really a change of
+		# value of the htmleditable as it only exists as of now. When we decide
+		# to put this change event logic in an external component though, then
+		# we *would* expect an event here, because this external component
+		# operates at the level of a contenteditable.
+		$(@).htmleditable 'value', $(@).originalHtml()
 
 		# Feature-specific initialization.
 		for name, feature of $(@).data('htmleditable').features
-			feature?.init?.call $(@)
+			feature.init?.call $(@)
+			for keys, args of feature.hotkeys
+				# `jquery.hotkeys.js` does not seem to support `$.fn.on` (yet?)
+				$(@).bind 'keydown', keys, (e) ->
+					e.preventDefault()
+					e.stopPropagation()
+					$(@).htmleditable 'command', name, args...
 		
 		@
 	
-	value: ->
-		$(@).html arguments...
+	value: (html) ->
+		return $(@).data('htmleditable').value unless html?
+		
+		# We are setting a new value into the htmleditable field. Before we can
+		# do so we must check if the new content defines some state settings,
+		# after which we have to make sure that the content is clean.
+
+		# TODO: `htmleditable:state` may be not the best key name, as it is not
+		# really a state but rather a command specification (?)
+		html = html.replace /^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, (match, before, settings, after) =>
+			features = $(@).data('htmleditable').features
+			for name, value of $.parseJSON "{ #{ settings } }"
+				if features[name]?.content is yes
+					$(@).htmleditable 'command', name, value
+			before + after
+		
+		getRinsebin().html html
+		cleaned = cleanTree.call $(@), getRinsebin()[0]
+		getRinsebin().empty()
+
+		result = $(@).empty().append cleaned
+		$(@).updateValue()
+
+		return result
 
 	state: (features) ->
 		state = $(@).data('htmleditable')?.state
@@ -303,20 +185,15 @@ $.fn.htmleditable = $.pluginify
 		requested
 	
 	command: (command, args...) ->
-		state = $(@).data('htmleditable').features[command]?.context?.set?.call $(@), $(@).htmleditable('selection'), args...
-		# TODO: Do we really want to update state here? Isn't that what
-		# `updateState` is for?
-		if state?
-			unless $.isPlainObject state
-				value = state
-				state = {}
-				state[command] = value
-			setState.call @, state
-		
-		# TODO: This is superfluous in many (all?) scenarios. Think about how
-		# we can leanify this.
-		updateValue.call @
-		updateState.call @
+		state = {}
+		feature = $(@).data('htmleditable').features[command]
+		if 'command' of feature
+			feature.command.call $(@), args...
+		else
+			state[command] = args[0]
+		$(@).updateState state
+
+		$(@).updateValue()
 
 		@
 	
@@ -328,15 +205,13 @@ $.fn.htmleditable = $.pluginify
 	# between "no argument supplied" and "argument with value `undefined`
 	# supplied."
 	selection: (range) ->
-		rangy.init()
-
 		if arguments.length > 0
 			if range?.nodeType is 1
 				r = rangy.createRange()
 				r.selectNodeContents range
 				range = r
 			rangy.getSelection().setSingleRange range
-			updateState.call @
+			$(@).updateState()
 			return @
 		
 		selection = rangy.getSelection()
@@ -359,16 +234,117 @@ $.fn.htmleditable = $.pluginify
 
 		range
 
-$.htmleditable ?= {}
+jQuery.htmleditable ?= {}
+
+cleanTree = (root) ->
+	features = @data('htmleditable').features
+	
+	layer = (node) ->
+		# Never pass the actual root node to a feature, because it is not
+		# something that the feature should have access to. Always pass a
+		# jQuery object though, so that features can simply use code like
+		# `@is 'selector'` without having to explicitly deal with the scenario
+		# in which `@` doesn't hold a node.
+		$node = if node is root then $() else $ node
+		if node.nodeType is 1
+			children = document.createDocumentFragment()
+			for child in node.childNodes
+				include = layer.call @, child
+				children.appendChild include if include?
+
+			processors = (feature.element for name, feature of features)
+			i = 0
+			element = undefined
+			while i < processors.length
+				processor = processors[i++]
+				result = processor?.call $node, element, children
+				if $.isFunction result
+					processors.push result
+				else if result?
+					element = result
+			if element?
+				element.appendChild children
+				children = element
+			
+			return children
+			
+		else if node.nodeType is 3
+			return $node.clone(no, no)[0]
+	
+	layer.call @, root
+
+# TODO: This can be a rather heavy function, so we either have to make sure
+# that it is not invoked too frequently, or we have to make it more light-
+# weight by only running the cleaning part if there is a chance that it will
+# actually result in a changed value.
+$.fn.updateValue = ->
+	data = @data 'htmleditable'
+
+	for name, feature of data.features
+		feature.change?.call @
+
+	# Clone the htmleditable node tree because it should remain unmodified at
+	# all times, but do so without copying data so that `:htmleditable` will no
+	# longer hold -- which is the desired behavior because we do not want
+	# `$.fn.html` to perform its cleaning magic on the cloned content.
+	$current = @clone no, no
+
+	settings = {}
+	for name, feature of data.features
+		feature.output?.call @, $current
+		if feature.content is yes
+			# TODO: Escape any occurences of `-->` (or `--`?)
+			settings[name] = @htmleditable 'state', name
+	
+	current = $current.html()
+	unless $.isEmptyObject settings
+		# TODO: Has `JSON.stringify` the browser support we need?
+		settings = JSON.stringify settings
+		current = "<!--htmleditable:state #{ settings[1...settings.length - 1] } -->#{ current }"
+
+	unless data.value is current
+		data.value = current
+		@change()
+
+$.fn.updateState = (state) ->
+	selection = @htmleditable 'selection'
+	featuresState = {}
+	for name, feature of @data('htmleditable').features
+		featureState = feature?.state?.call @
+		if featureState isnt undefined
+			unless $.isPlainObject featureState
+				value = featureState
+				(featureState = {})[name] = value
+			$.extend featuresState, featureState
+	$.extend featuresState, state
+	
+	data = @data 'htmleditable'
+	data.state ?= {}
+	
+	delta = {}
+	for key, value of featuresState
+		# TODO: This should be a deep compare (or delegate comparison to the
+		# feature).
+		unless data.state[key] is value
+			data.state[key] = value
+			delta[key] = value
+	
+	@trigger('state', delta) unless $.isEmptyObject delta
+
+$rinsebin = $()
+getRinsebin = ->
+	unless $rinsebin.length is 1
+		$rinsebin = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;" />').prependTo 'body'
+	$rinsebin
 
 # TODO: Move to dedicated plugin project.
-$.fn.domSplice = (element) ->
+jQuery.fn.domSplice = (element) ->
 	elements = []
 	@each ->
 		if element
 			$element = $(element)
 			elements.push $element.get()...
-		if @nodeType is 3 and @nodeName.toLowerCase() in ['style']
+		if @nodeType is 1 and @nodeName.toLowerCase() in ['style', 'script', 'iframe']
 			if element
 				$(@).replaceWith $element
 			else
