@@ -17,7 +17,7 @@
         expect($elem.htmleditable().get()).toEqual($elem.get());
         return expect($elem).toBe(':htmleditable');
       });
-      return it("cancels features that are invalidated by later features", function() {
+      return xit("cancels features that are invalidated by later features", function() {
         spyOn($.htmleditable.multiline, 'init');
         $elem.htmleditable(['singleline']);
         return expect($.htmleditable.multiline.init).not.toHaveBeenCalled();
@@ -114,18 +114,18 @@
           return expect($elem.htmleditable('state', 'bold')).toBe(true);
         });
       });
-      it("sets content-level state settings for features that desire so", function() {
+      xit("sets content-level state settings for features that desire so", function() {
         var val;
         val = $elem.htmleditable(['margins']).htmleditable('value');
         return expect(val.indexOf("<!--htmleditable:state \"margins\":" + ($elem.htmleditable('state', 'margins')) + " -->")).not.toBe(-1);
       });
-      it("gets state according to content-level settings where applicable", function() {
+      xit("gets state according to content-level settings where applicable", function() {
         $elem.htmleditable(['margins']);
         expect($elem.htmleditable('state', 'margins')).toBe(false);
         $elem.htmleditable('value', '	[noise]	<!--htmleditable:state "margins": true --><strong>content</strong>bla');
         return expect($elem.htmleditable('state', 'margins')).toBe(true);
       });
-      return it("never leaves any content-level settings linger at edit-time", function() {
+      return xit("never leaves any content-level settings linger at edit-time", function() {
         ($elem = $('#settings', fix)).htmleditable(['margins']);
         expect($elem[0].innerHTML.indexOf('<!--htmleditable:state')).toBe(-1);
         $elem.htmleditable('value', 'bla<!--htmleditable:state "margins":false -->bla');

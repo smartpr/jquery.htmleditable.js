@@ -58,6 +58,7 @@
 <script type="text/javascript" src="lib/jquery.hotkeys.js"></script>
 <script type="text/javascript" src="lib/core.js"></script>
 <script type="text/javascript" src="lib/base.js"></script>
+<script type="text/javascript" src="lib/native.js"></script>
 <script type="text/javascript" src="lib/linebreaks.js"></script>
 <script type="text/javascript" src="lib/singleline.js"></script>
 <script type="text/javascript" src="lib/bold.js"></script>
@@ -109,7 +110,7 @@
   Last line
 </div><script>
   $(function() {
-    $('#demo-area').htmleditable(['bold', 'link', 'list']);
+    $('#demo-area').htmleditable('linebreaks', ['bold', 'link', 'list']);
   });
 </script>
 </article>

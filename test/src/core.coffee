@@ -24,7 +24,7 @@ describe "$.fn.htmleditable()", ->
 		
 		# TODO: Test with features, syntax similar to 'state'.
 
-		it "cancels features that are invalidated by later features", ->
+		xit "cancels features that are invalidated by later features", ->
 			spyOn $.htmleditable.multiline, 'init'
 			$elem.htmleditable ['singleline']
 			expect($.htmleditable.multiline.init).not.toHaveBeenCalled()
@@ -135,12 +135,12 @@ describe "$.fn.htmleditable()", ->
 		
 		# TODO: This stuff doesn't really belong under `state` I think.
 
-		it "sets content-level state settings for features that desire so", ->
+		xit "sets content-level state settings for features that desire so", ->
 			val = $elem.htmleditable(['margins']).htmleditable 'value'
 			expect(val.indexOf "<!--htmleditable:state \"margins\":#{ $elem.htmleditable 'state', 'margins' } -->").not.toBe -1
 		
 		# TODO: Test using `#settings`.
-		it "gets state according to content-level settings where applicable", ->
+		xit "gets state according to content-level settings where applicable", ->
 			$elem.htmleditable ['margins']
 			# Make sure current state is different from new state that will be
 			# assigned via content-level setting.
@@ -149,7 +149,7 @@ describe "$.fn.htmleditable()", ->
 			$elem.htmleditable 'value', '	[noise]	<!--htmleditable:state "margins": true --><strong>content</strong>bla'
 			expect($elem.htmleditable 'state', 'margins').toBe yes
 		
-		it "never leaves any content-level settings linger at edit-time", ->
+		xit "never leaves any content-level settings linger at edit-time", ->
 			($elem = $ '#settings', fix).htmleditable ['margins']
 			expect($elem[0].innerHTML.indexOf '<!--htmleditable:state').toBe -1
 

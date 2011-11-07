@@ -3,7 +3,6 @@ $ = jQuery
 # TODO: Rename to `lists` (denoting the fact that it deals with multiple types
 # of lists)?
 $.htmleditable.list =
-	# condition: ['multiline']
 
 	element: (element, children) ->
 		if not @is 'ul, ol'

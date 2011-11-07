@@ -997,11 +997,13 @@ jasmine.Block = function(env, func, spec) {
 };
 
 jasmine.Block.prototype.execute = function(onComplete) {  
-  try {
+  // Tim: don't catch errors because it makes it impossible to find out where
+  // they originated.
+  // try {
     this.func.apply(this.spec);
-  } catch (e) {
-    this.spec.fail(e);
-  }
+  // } catch (e) {
+  //   this.spec.fail(e);
+  // }
   onComplete();
 };
 /** JavaScript API reporter.

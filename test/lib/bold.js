@@ -5,6 +5,24 @@
     return $elem = $('#editable', fix);
   });
   describe("$.htmleditable.bold", function() {
+    describe("interprets headers", function() {
+      it("makes headers bold", function() {
+        $elem.htmleditable(['bold']).htmleditable('value', "<h1>bold</h1>not bold");
+        return expect($elem.htmleditable('value').toLowerCase()).toBe("<p><strong>bold</strong></p>not bold");
+      });
+      it("keeps trailing whitespace and linebreaks outside of the bold", function() {
+        $elem.htmleditable(['bold']).htmleditable('value', "<h1>bold<br></h1>not bold");
+        return expect($elem.htmleditable('value').toLowerCase()).toBe("<strong>bold</strong><br><br><br>not bold");
+      });
+      it("does not add element if header already contains bold tag", function() {
+        $elem.htmleditable(['bold']).htmleditable('value', "<h1><strong>bold</strong></h1>not bold");
+        return expect($elem.htmleditable('value').toLowerCase()).toBe("<strong>bold</strong><br><br>not bold");
+      });
+      return it("does not add element if header is wrapped by bold tag", function() {
+        $elem.htmleditable(['bold']).htmleditable('value', "<strong><h1>bold</h1></strong>not bold");
+        return expect($elem.htmleditable('value').toLowerCase()).toBe("<p><strong>bold</strong><p>not bold");
+      });
+    });
     return it("defines hotkeys", function() {
       spyOn($.htmleditable.bold, 'command');
       $elem.htmleditable(['bold']);

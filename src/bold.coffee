@@ -16,22 +16,29 @@ tag = ->
 
 $.htmleditable.bold =
 	
-	element: (element) ->
+	element: (element, children) ->
 		return if @length is 0 or element?
 
 		if @is 'strong, b'
 			return document.createElement tag()
 		
-		if @is ':header'
+		# TODO: We only recognize nested bold tags that are direct children of
+		# the header. Is this sufficient?
+		if @is(':header') and $(children.childNodes).filter(tag()).length is 0
 			return (element, children) ->
-				return if element?
+				return if $(element).is ':header'
 
 				# Wrap contents of `children` in a bold tag.
 				bold = document.createElement tag()
-				while children.firstChild?
-					bold.appendChild children.firstChild
-				children.appendChild bold
-
+				child = children.lastChild
+				while child?
+					next = child.previousSibling
+					if bold.hasChildNodes() or not $(child).is('br') and (child.nodeType isnt 3 or not /^\s*$/.test child.data)
+						unless bold.hasChildNodes()
+							children.insertBefore bold, child
+						bold.insertBefore child, bold.firstChild
+					child = next
+				
 				return
 
 		return

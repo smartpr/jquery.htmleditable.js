@@ -19,7 +19,7 @@ jQuery.fn.html = ->
 
 jQuery.fn.htmleditable = $.pluginify
 	
-	init: (features) ->
+	init: (linemode, features) ->
 		# Document must be ready before initialization because we need to be
 		# capable of setting `styleWithCSS` to `no` before we can reliably let
 		# people use it.
@@ -32,9 +32,7 @@ jQuery.fn.htmleditable = $.pluginify
 		rangy.init()
 
 		# TODO: Filter out duplicates.
-		# TODO: Have a dedicated argument for line mode, of which `native` is
-		# the default value.
-		features = $.merge ['base', 'linebreaks'], features ? []
+		features = $.merge [linemode, 'base'], features ? []
 		load = $.merge [], features
 		for feature in features
 			for condition in jQuery.htmleditable[feature]?.condition ? []
@@ -80,6 +78,8 @@ jQuery.fn.htmleditable = $.pluginify
 				try e.preventDefault() unless document.execCommand('Paste') is no catch err
 				setTimeout =>
 					$(@).focus()
+
+					console.log getRinsebin().html()
 
 					cleaned = cleanTree.call $(@), getRinsebin()[0]
 					getRinsebin().empty().append cleaned
@@ -263,7 +263,8 @@ cleanTree = (root) ->
 				else if result?
 					element = result
 			if element?
-				element.appendChild children
+				if children.hasChildNodes()
+					element.appendChild children
 				children = element
 			
 			return children
@@ -304,6 +305,7 @@ $.fn.updateValue = ->
 
 	unless data.value is current
 		data.value = current
+		# TODO: Rename to `val` in anticipation of `$.event.special.val`.
 		@change()
 
 $.fn.updateState = (state) ->

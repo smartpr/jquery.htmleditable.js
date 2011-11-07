@@ -4,7 +4,6 @@
 $ = jQuery
 
 $.htmleditable.linebreaks =
-	condition: ['-singleline']
 
 	element: (element) ->
 		# TODO: We can probably drop this `@length is 0` check as it won't
@@ -18,7 +17,9 @@ $.htmleditable.linebreaks =
 		# if no other features have claimed to have an interpretation for them.
 		# This allows for example a list feature to pick out certain paragraphs
 		# that represent list items from MS Word.
-		if @is 'p, :header'
+		# TODO: We want to do this namespace check in many (all?) places where
+		# we check for node name, so DRY up.
+		if @is('p, :header') and (@prop('prefix') ? @prop('scopeName')) in [undefined, null, 'HTML']
 			return (element, children) ->
 				return if element?
 
@@ -49,7 +50,8 @@ $.htmleditable.linebreaks =
 				last = children.lastChild
 				while last? and last.nodeType is 3 and /^\s*$/.test last.data
 					last = last.previousSibling
-				children.appendChild document.createElement 'br' unless $(last).is 'br'
+				unless $(last).is 'br'
+					children.appendChild document.createElement 'br'
 
 				return
 		
