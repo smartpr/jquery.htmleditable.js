@@ -37,17 +37,17 @@ Or leverage the fact that we are dealing with a regular block element and let
 it fit the content. (An entirely browser-powered auto-resizing text area, how
 cool is that?!)
 
-{% include richtextarea-autofit.html %}
+{% include demo.simple.html %}
 <details>
 <summary>Source</summary>
 {% highlight html %}
-{% include richtextarea-autofit.html %}
+{% include demo.simple.html %}
 {% endhighlight %}
 </details>
 
 ### Word processor wannabe
 
-...
+&hellip;
 
 ### Inline editing
 

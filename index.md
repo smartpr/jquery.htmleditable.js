@@ -8,17 +8,17 @@ attr-contenteditable) is pretty cool but a major pain to work with.
 makes interacting with a contenteditable element browser-independent, flexible
 and fun!
 
+### Work in progress
+
+This site and the code that it describes has not been officially released yet!
+
 ### Show me some code!
 
 It's simple:
 
 {% highlight js %}
 $('#editable').htmleditable();
-for (var i = 0; i < j; i++) window.alert("W00t!");                  char 80 -->
 {% endhighlight %}
-
-And then we have the other scenario in which you `inline some stuff that may
-actually not fit on one line` so we have to deal with that as well...
 
 ### Engine, not editor
 
@@ -33,4 +33,11 @@ but none of them is like htmleditable, for various reasons:
 	hellacious sources (yes I'm looking at you Microsoft Word).
 *	Configurable and extensible.
 
-Blub
+### Browser support
+
+We aim for support of the following browsers:
+
+*	latest version of Chrome;
+*	latest version of Safari;
+*	latest version of Firefox;
+*	Internet Explorer 8 and later.

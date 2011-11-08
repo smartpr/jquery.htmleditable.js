@@ -1,11 +1,16 @@
 <style>
-  html.gecko #demo-input {
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-input {
     outline: none;
+  }
+  /* TODO: Feature detect `appearance`, if feasible. */
+  html.msie #demo-input {
+    border: 1px solid #7f9db9;
   }
   #demo-input {
     -moz-appearance: textfield;
     -webkit-appearance: textfield;
-    appearance: textfield;
+    appearance: field;
     overflow-y: hidden;
     min-width: 20em;
     padding: .3em;
@@ -18,5 +23,7 @@
 </div>
 
 <script>
-  $('#demo-input').htmleditable(['singleline', 'bold']);
+  jQuery(function($) {
+    $('#demo-input').htmleditable('singleline', ['bold']);
+  });
 </script>

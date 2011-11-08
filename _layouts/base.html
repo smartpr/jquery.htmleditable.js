@@ -14,7 +14,7 @@
 		We need jQuery at this stage because `jquery.browser.min.js` depends on
 		it.
 		-->
-		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7b2.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.js"></script>
 		<!--
 		Load these environment checkers before any style sheets because styling
 		may be based on classes that are set by the checkers. If we would load
@@ -25,16 +25,15 @@
 		that we would like to have a guarantee that this piece of interface is
 		*never* displayed, not even briefly.
 		-->
-		<script type="text/javascript" src="{{ site.base_url }}/assets/jquery.browser.min.js"></script>
-		<script type="text/javascript" src="{{ site.base_url }}/assets/modernizr.js"></script>
+		<script type="text/javascript" src="{{ site.projects_url }}{{ site.project_path }}/assets/jquery.browser.min.js"></script>
+		<script type="text/javascript" src="{{ site.projects_url }}{{ site.project_path }}/assets/modernizr.js"></script>
 		<!--
 		TODO: Styling before any content, yet it looks like Firefox is building
 		the document before the styling has been applied. The result is a flash
 		of unstyled content. Hmm, how can we prevent this?
 		-->
-		<!-- <link class="theme" rel="stylesheet" type="text/css" href="http://projects.smart.pr/project-site.themes/smartpr-oss.css" /> -->
-		<link class="theme" rel="stylesheet" type="text/css" href="http://dev/project-site.themes/smartpr-oss.css" />
-		<link rel="stylesheet" type="text/css" href="{{ site.base_url }}/assets/site.css" />
+		<link class="theme" rel="stylesheet" type="text/css" href="{{ site.projects_url }}/project-site.themes/smartpr-oss.css" />
+		<link rel="stylesheet" type="text/css" href="{{ site.projects_url }}{{ site.project_path }}/assets/site.css" />
 	</head>
 	<body>
 		<header>
@@ -43,11 +42,11 @@
 		</header>
 		
 		<nav>
-			<a href="{{ site.base_url }}/index.html"{% if page.url == '/index.html' %} class="selected"{% endif %}>overview</a>
-			<a href="{{ site.base_url }}/demo.html"{% if page.url == '/demo.html' %} class="selected"{% endif %}>demo</a>
+			<a href="{{ site.projects_url }}{{ site.project_path }}/index.html"{% if page.url == '/index.html' %} class="selected"{% endif %}>overview</a>
+			<a href="{{ site.projects_url }}{{ site.project_path }}/demo.html"{% if page.url == '/demo.html' %} class="selected"{% endif %}>demo</a>
 			<a href="{{ site.repository }}/raw/{{ site.version }}/jquery.htmleditable.standalone.min.js">download</a>
-			<a href="{{ site.base_url }}/doc/index.html">documentation</a>
-			<a href="{{ site.base_url }}/test.html">tests</a>
+			<a href="{{ site.projects_url }}{{ site.project_path }}/doc/index.html">documentation</a>
+			<a href="{{ site.projects_url }}{{ site.project_path }}/test.html">tests</a>
 			<a href="{{ site.repository }}">development</a>
 		</nav>
 

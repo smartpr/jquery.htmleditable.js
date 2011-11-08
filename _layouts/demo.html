@@ -2,16 +2,18 @@
 layout: base
 ---
 
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/rangy-core.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/rangy-selectionsaverestore.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/htmlparser.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/jquery.pluginify.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/jquery.hotkeys.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/core.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/base.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/multiline.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/singleline.js"></script>
-<script type="text/javascript" src="https://raw.github.com/smartpr/jquery.htmleditable.js/{{ site.version }}/lib/bold.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-core.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-selectionsaverestore.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/jquery.pluginify.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/core.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/base.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/native.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/linebreaks.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/singleline.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/bold.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/link.js"></script>
+<script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/list.js"></script>
 
 <aside id="preview">
 	<h3>Live preview</h3>
@@ -34,16 +36,24 @@ layout: base
 
 		// Make the live preview always be within the viewport.
 
-		// TODO: max-height for both $content and $sticky.
-
 		var $content = $('#preview > .content'),
-			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight(),
-			$sticky = $content.clone().css({
-				position: 'fixed',
-				top: spacing,
-				left: $content.offset().left,
-				width: $content.width()
-			}).hide().insertAfter($content);
+			$sticky = $content.clone(),
+			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight();
+		
+		// TODO: Shrink for footer -- would probably be best to work with
+		// section bottom instead of footer top.
+		var height = $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height());
+		$content.css({
+			'max-height': height
+		});
+		var height = $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height());
+		$sticky.css({
+			position: 'fixed',
+			top: spacing,
+			left: $content.offset().left,
+			width: $content.width(),
+			'max-height': height
+		}).hide().insertAfter($content);
 		
 		$(window).
 			on('scroll', function() {
@@ -52,13 +62,22 @@ layout: base
 					$sticky[isStickyNeeded ? 'show' : 'hide']();
 					$content.css('visibility', isStickyNeeded ? 'hidden' : '');
 				}
+				// TODO: Only do this when `$content` is visible.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
 			}).
 			on('resize', function() {
 				// Is being called when zooming as well.
 				// TODO: That is, in Chrome. Other browsers?
+				// TODO: Only update what's visible and if height has changed.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
 				$sticky.css({
 					left: $content.offset().left,
-					width: $content.width()
+					width: $content.width(),
+					'max-height': $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height())
 				});
 			});
 	

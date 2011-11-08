@@ -19,9 +19,11 @@
 </div>
 
 <script>
-  $('#demo-inline .inline').
-    on('click', function(e) {
-      e.preventDefault();
-    }).
-    htmleditable(['singleline', 'bold']);
+  jQuery(function($) {
+    $('#demo-inline .inline').
+      on('click', function(e) {
+        e.preventDefault();
+      }).
+      htmleditable('singleline', ['bold']);
+  });
 </script>

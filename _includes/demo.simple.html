@@ -1,0 +1,56 @@
+<style>
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-simple {
+    outline: none;
+  }
+  /* TODO: Feature detect `appearance`, if feasible. */
+  html.msie #demo-simple {
+    border: 1px solid #7f9db9;
+  }
+  #demo-simple {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: field;
+    overflow-x: auto;
+    width: 95%;
+    padding: .5em;
+  }
+  #demo-simple-tools {
+    margin-bottom: .5em;
+  }
+  #demo-simple-tools [data-command].active {
+    font-weight: bold;
+  }
+</style>
+
+<div id="demo-simple-tools">
+  <button data-command="bold">Bold</button>
+</div>
+<div id="demo-simple">
+  <p>Yeah <b>this</b> was <strong>already</strong> in here...</p>
+  <p>Yup</p>
+</div>
+
+<script>
+  jQuery(function($) {
+
+    $('#demo-simple').
+      on('state', function(e, state) {
+        for (key in state) {
+          $('#demo-simple-tools [data-command="' + key + '"]').
+            attr('disabled', state[key] === null)
+            [(state[key] === true ? 'add' : 'remove') + 'Class']('active');
+        }
+      }).
+      htmleditable('native', ['bold', 'link', 'list']);
+    
+    $('#demo-simple-tools [data-command]').
+      on('mousedown', function(e) {
+        e.preventDefault();
+      }).
+      on('click', function() {
+        $('#demo-simple').htmleditable('command', $(this).data('command'));
+      });
+    
+  });
+</script>

@@ -1,8 +1,6 @@
 @import "compass/css3";
 @import "compass/reset/utilities";
 
-$line-gray: #eaeaea;
-
 html.gecko [contenteditable="true"] {
 	@include reset-focus;
 }
@@ -15,28 +13,17 @@ html.gecko [contenteditable="true"] {
 	}
 	& > .content {
 		padding: .5em;
+		background-color: LemonChiffon;
 		@include border-radius;
 		border: {
-			top: 1px dashed $line-gray;
-			bottom: 1px dashed $line-gray;
+			// Calculate color based on `background-color` using same darken
+			// parameters as used for code blocks.
+			top: 1px solid Khaki;
+			bottom: 1px solid Khaki;
 		}
 		overflow: {
 			x: auto;
 			y: auto;
 		}
-	}
-}
-
-#richtextinput-fixed, #richtextinput-autofit {
-	@include appearance(textfield);
-	padding: .5em;
-	overflow-x: auto;
-}
-
-#richtextinput-fixed {
-	white-space: nowrap;
-	overflow: {
-		x: hidden;
-		y: hidden;
 	}
 }

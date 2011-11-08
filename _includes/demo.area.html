@@ -1,11 +1,18 @@
 <style>
-  html.gecko #demo-area {
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-area {
     outline: none;
   }
+  /* TODO: Feature detect `appearance`, if feasible. */
+  html.msie #demo-area {
+    border: 1px solid #7f9db9;
+  }
   #demo-area {
-    -moz-appearance: textfield;
-    -webkit-appearance: textfield;
-    appearance: textfield;
+    /* Each of the following properties has a different set of allowed values,
+       as defined by the corresponding specifications. */
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    appearance: field;
     /* Enable scrollbars when necessary. */
     overflow-x: auto;
     overflow-y: auto;
@@ -17,15 +24,14 @@
     height: 5em;
     padding: .5em;
   }
-  #demo-area > p:last-child {
-    margin-bottom: 0;
-  }
 </style>
 
 <div id="demo-area">
-  <p>Yeah this was <strong>already</strong> in here...</p>
+  Yeah <b>this</b> was <strong>already</strong> in here...
 </div>
 
 <script>
-  $('#demo-area').htmleditable(['bold']);
+  jQuery(function($) {
+    $('#demo-area').htmleditable('linebreaks', ['bold']);
+  });
 </script>

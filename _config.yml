@@ -1,4 +1,7 @@
+# This is all that needs to be changed when deploying to production
+projects_url: http://dev
+
 repository: https://github.com/smartpr/jquery.htmleditable.js
 version: master
 pygments: true
-base_url: http://dev/jquery.htmleditable.js/_site
+project_path: /jquery.htmleditable.js/_site
