@@ -7,17 +7,16 @@ parts = [
 	'rangy-core.js'
 	'rangy-selectionsaverestore.js'
 	'jquery.pluginify.js'
-	'htmlparser.js'
 	'jquery.hotkeys.js'
 
 	'core.js'
 	'base.js'
+	'native.js'
 	'singleline.js'
-	'multiline.js'
+	'linebreaks.js'
 	'bold.js'
 	'link.js'
 	'list.js'
-	'margins.js'
 ]
 
 build = (watch, bundle, done) ->

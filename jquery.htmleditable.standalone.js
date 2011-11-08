@@ -3335,331 +3335,6 @@ rangy.createModule("SaveRestore", function(api, module) {
   };
 }).call(this);
 /*
- * HTML Parser By John Resig (ejohn.org)
- * Modified by Juriy "kangax" Zaytsev
- * Undressed and modified even more by Tim Molendijk (timmolendijk.nl)
- * Original code by Erik Arvidsson, Mozilla Public License
- * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
- *
- * // Use like so:
- * HTMLParser(htmlString, {
- *     start: function(tag, attrs, unary) {},
- *     end: function(tag) {},
- *     chars: function(text) {},
- *     comment: function(text) {}
- * });
- *
- */
-
-(function(global){
-
-  // Regular Expressions for parsing tags and attributes
-  var startTag = /^<([^\s<>\/]+)((?:\s+[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
-      // kangax: /^<(\w+)       ((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/
-      // ejohn:  /^<(\w+)       ((?:\s+\w+    (?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/
-      endTag = /^<\/(\w+)[^>]*>/,
-      attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
-      doctype = /^<!DOCTYPE [^>]+>/i;
-    
-  // Empty Elements - HTML 4.01
-  var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
-
-  // Block Elements - HTML 4.01
-  var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
-
-  // Inline Elements - HTML 4.01
-  var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
-
-  // Elements that you can, intentionally, leave open
-  // (and which close themselves)
-  var closeSelf = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
-
-  // Attributes that have their values filled in disabled="disabled"
-  var fillAttrs = makeMap("checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected");
-
-  // Special Elements (can contain anything)
-  var special = makeMap("script,style");
-  
-  var reCache = { }, stackedTag, re;
-
-  var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html;
-    stack.last = function(){
-      return this[ this.length - 1 ];
-    };
-
-    while ( html ) {
-      chars = true;
-
-      // Make sure we're not in a script or style element
-      if ( !stack.last() || !special[ stack.last() ] ) {
-
-        // Comment
-        if ( html.indexOf("<!--") === 0 ) {
-          index = html.indexOf("-->");
-  
-          if ( index >= 0 ) {
-            if ( handler.comment )
-              handler.comment( html.substring( 4, index ) );
-            html = html.substring( index + 3 );
-            chars = false;
-          }
-        }
-        else if ( match = doctype.exec( html )) {
-          if ( handler.doctype )
-            handler.doctype( match[0] );
-          html = html.substring( match[0].length );
-          chars = false;
-        
-        // end tag
-        } else if ( html.indexOf("</") === 0 ) {
-          match = html.match( endTag );
-  
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( endTag, parseEndTag );
-            chars = false;
-          }
-  
-        // start tag
-        } else if ( html.indexOf("<") === 0 ) {
-          match = html.match( startTag );
-  
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( startTag, parseStartTag );
-            chars = false;
-          }
-        }
-
-        if ( chars ) {
-          index = html.indexOf("<");
-          
-          var text = index < 0 ? html : html.substring( 0, index );
-          html = index < 0 ? "" : html.substring( index );
-          
-          if ( handler.chars )
-            handler.chars( text );
-        }
-
-      } else {
-        
-        stackedTag = stack.last().toLowerCase();
-        reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp("([\\s\\S]*?)<\/" + stackedTag + "[^>]*>", "i"));
-        
-        html = html.replace(reStackedTag, function(all, text) {
-          if (stackedTag !== 'script' && stackedTag !== 'style') {
-            text = text
-              .replace(/<!--([\s\S]*?)-->/g, "$1")
-              .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
-          }
-
-          if ( handler.chars )
-            handler.chars( text );
-
-          return "";
-        });
-
-        parseEndTag( "", stackedTag );
-      }
-
-      if ( html == last )
-        throw "Parse Error: " + html;
-      last = html;
-    }
-    
-    // Clean up any remaining tags
-    parseEndTag();
-
-    function parseStartTag( tag, tagName, rest, unary ) {
-      if (typeof tagName === 'string')
-        tagName = tagName.toLowerCase();
-
-      if ( block[ tagName ] ) {
-        while ( stack.last() && inline[ stack.last() ] ) {
-          parseEndTag( "", stack.last() );
-        }
-      }
-
-      if ( closeSelf[ tagName ] && stack.last() == tagName ) {
-        parseEndTag( "", tagName );
-      }
-
-      unary = empty[ tagName ] || !!unary;
-
-      // if ( !unary )
-      //   stack.push( tagName.toLowerCase() );
-      
-      if ( handler.start ) {
-        var attrs = {};
-  
-        rest.replace(attr, function(match, name) {
-          var value = arguments[2] ? arguments[2] :
-            arguments[3] ? arguments[3] :
-            arguments[4] ? arguments[4] :
-            fillAttrs[name] ? name : "";
-          attrs[name] = {
-            value: value,
-            escaped: value.replace(/(^|[^\\])"/g, '$1\\\"')
-          };
-        });
-  
-        if ( handler.start )
-          if ( handler.start( tagName.toLowerCase(), attrs, empty ) === true && !unary )
-            stack.push( tagName.toLowerCase() );
-      }
-    }
-
-    function parseEndTag( tag, tagName ) {
-      if (typeof tagName === 'string')
-        tagName = tagName.toLowerCase();
-
-      // If no tag name is provided, clean shop
-      if ( !tagName )
-        var pos = 0;
-      
-      // Find the closest opened tag of the same type
-      else
-        for ( var pos = stack.length - 1; pos >= 0; pos-- )
-          if ( stack[ pos ] == tagName )
-            break;
-      
-      if ( pos >= 0 ) {
-        // Close all the open elements, up the stack
-        if ( handler.end )
-          for ( var i = stack.length - 1; i >= pos; i-- )
-            handler.end( stack[ i ] );
-        
-        // Remove the open elements from the stack
-        stack.length = pos;
-      }
-    }
-  };
-  
-  global.HTMLtoXML = function( html ) {
-    var results = "";
-    
-    HTMLParser(html, {
-      start: function( tag, attrs, unary ) {
-        results += "<" + tag;
-    
-        for ( var i = 0; i < attrs.length; i++ )
-          results += " " + attrs[i].name + '="' + attrs[i].escaped + '"';
-    
-        results += (unary ? "/" : "") + ">";
-      },
-      end: function( tag ) {
-        results += "</" + tag + ">";
-      },
-      chars: function( text ) {
-        results += text;
-      },
-      comment: function( text ) {
-        results += "<!--" + text + "-->";
-      }
-    });
-    
-    return results;
-  };
-  
-  global.HTMLtoDOM = function( html, doc ) {
-    // There can be only one of these elements
-    var one = makeMap("html,head,body,title");
-    
-    // Enforce a structure for the document
-    var structure = {
-      link: "head",
-      base: "head"
-    };
-  
-    if ( !doc ) {
-      if ( typeof DOMDocument != "undefined" )
-        doc = new DOMDocument();
-      else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument )
-        doc = document.implementation.createDocument("", "", null);
-      else if ( typeof ActiveX != "undefined" )
-        doc = new ActiveXObject("Msxml.DOMDocument");
-      
-    } else
-      doc = doc.ownerDocument ||
-        doc.getOwnerDocument && doc.getOwnerDocument() ||
-        doc;
-    
-    var elems = [],
-      documentElement = doc.documentElement ||
-        doc.getDocumentElement && doc.getDocumentElement();
-        
-    // If we're dealing with an empty document then we
-    // need to pre-populate it with the HTML document structure
-    if ( !documentElement && doc.createElement ) (function(){
-      var html = doc.createElement("html");
-      var head = doc.createElement("head");
-      head.appendChild( doc.createElement("title") );
-      html.appendChild( head );
-      html.appendChild( doc.createElement("body") );
-      doc.appendChild( html );
-    })();
-    
-    // Find all the unique elements
-    if ( doc.getElementsByTagName )
-      for ( var i in one )
-        one[ i ] = doc.getElementsByTagName( i )[0];
-    
-    // If we're working with a document, inject contents into
-    // the body element
-    var curParentNode = one.body;
-    
-    HTMLParser( html, {
-      start: function( tagName, attrs, unary ) {
-        // If it's a pre-built element, then we can ignore
-        // its construction
-        if ( one[ tagName ] ) {
-          curParentNode = one[ tagName ];
-          return;
-        }
-      
-        var elem = doc.createElement( tagName );
-        
-        for ( var attr in attrs )
-          elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
-        
-        if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] != "boolean" )
-          one[ structure[ tagName ] ].appendChild( elem );
-        
-        else if ( curParentNode && curParentNode.appendChild )
-          curParentNode.appendChild( elem );
-          
-        if ( !unary ) {
-          elems.push( elem );
-          curParentNode = elem;
-        }
-      },
-      end: function( tag ) {
-        elems.length -= 1;
-        
-        // Init the new parentNode
-        curParentNode = elems[ elems.length - 1 ];
-      },
-      chars: function( text ) {
-        curParentNode.appendChild( doc.createTextNode( text ) );
-      },
-      comment: function( text ) {
-        // create comment node
-      }
-    });
-    
-    return doc;
-  };
-
-  function makeMap(str){
-    var obj = {}, items = str.split(",");
-    for ( var i = 0; i < items.length; i++ ) {
-      obj[ items[i] ] = true;
-      obj[ items[i].toUpperCase() ] = true;
-    }
-    return obj;
-  }
-})(typeof exports === 'undefined' ? window : exports);/*
  * jQuery Hotkeys Plugin
  * Copyright 2010, John Resig
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -3758,215 +3433,43 @@ rangy.createModule("SaveRestore", function(api, module) {
 	});
 
 })( jQuery );(function() {
-  /**
-  
-  # core
-  
-  The core editor *engine* jQuery plugin.
-  
-  */
-  "use strict";
-  var $, $rinsebin, getRinsebin, getState, overriddenHtml, setState, updateState, _ref;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
+  'use strict';
+  var $, $rinsebin, cleanTree, getRinsebin, _ref;
+  var __slice = Array.prototype.slice, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
     }
     return -1;
-  }, __slice = Array.prototype.slice;
-  $ = jQuery;
-  $.expr[':'].htmleditable = function(el) {
+  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  $ = jQuery.sub();
+  jQuery.expr[':'].htmleditable = function(el) {
     var $el;
     $el = $(el);
     return $el.is('[contenteditable="true"]') && ($el.data('htmleditable') != null);
   };
-  overriddenHtml = $.fn.html;
-  $.fn.html = function(html) {
-    var $decoder, $editable, cursor, element, elementProcess, feature, features, forceRemove, name, p, process, remove, result, _i, _j, _len, _len2, _ref, _ref2;
-    if (this[0] === getRinsebin()[0] && !(html != null)) {
-      html = overriddenHtml.call(this);
-      $editable = $(':htmleditable:first');
-      features = $editable.data('htmleditable').features;
-      for (name in features) {
-        feature = features[name];
-        result = feature != null ? (_ref = feature.input) != null ? _ref.call($editable, html) : void 0 : void 0;
-        if (typeof result === 'string') {
-          html = result;
-        }
-      }
-      $decoder = $('<div />');
-      cursor = this.empty()[0];
-      process = [];
-      HTMLParser(html, {
-        start: function(name, attrs, empty) {
-          var $element, element, elementProcess, feature, remove, _ref2;
-          try {
-            element = document.createElement(name);
-          } catch (err) {
-
-          }
-          if (!element) {
-            return;
-          }
-          $element = $(element);
-          element = void 0;
-          elementProcess = [];
-          for (name in features) {
-            feature = features[name];
-            result = feature != null ? (_ref2 = feature.allow) != null ? _ref2.call($element, attrs) : void 0 : void 0;
-            if ($.isFunction(result)) {
-              elementProcess.push(result);
-            } else if (!element) {
-              if (result === true) {
-                element = $element[0];
-              }
-              if ((result != null ? result.nodeType : void 0) === 1) {
-                element = result;
-              }
-            }
-          }
-          if (elementProcess.length > 0) {
-            remove = !(element != null);
-            if (element == null) {
-              element = $element[0];
-            }
-            process.push([element, elementProcess, remove]);
-          }
-          if (!element) {
-            return;
-          }
-          cursor.appendChild(element);
-          if (!(element.nodeName in empty)) {
-            cursor = element;
-          }
-          return true;
-        },
-        end: function(name) {
-          return cursor = cursor.parentNode;
-        },
-        chars: function(text) {
-          return cursor.appendChild(document.createTextNode($decoder.html(text).text()));
-        }
-      });
-      for (_i = 0, _len = process.length; _i < _len; _i++) {
-        _ref2 = process[_i], element = _ref2[0], elementProcess = _ref2[1], remove = _ref2[2];
-        forceRemove = false;
-        for (_j = 0, _len2 = elementProcess.length; _j < _len2; _j++) {
-          p = elementProcess[_j];
-          forceRemove = forceRemove || p.call(this, element, remove) === true;
-        }
-        if (forceRemove || remove) {
-          $(element).domSplice();
-        }
-      }
-      return overriddenHtml.call(this);
-    }
+  $.fn.originalHtml = $.fn.html;
+  jQuery.fn.html = function() {
+    var _ref;
     if (this.eq(0).is(':htmleditable')) {
-      if (html == null) {
-        return this.data('htmleditable').value;
+      return this.htmleditable.apply(this, ['value'].concat(__slice.call(arguments)));
+    }
+    return (_ref = $(this)).originalHtml.apply(_ref, arguments);
+  };
+  jQuery.fn.htmleditable = $.pluginify({
+    init: function(linemode, features) {
+      var args, condition, feature, i, keys, l, load, name, shouldBeIncluded, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+      if (!jQuery.isReady) {
+        $.error("Initialization of htmleditable is not possible before the document is ready. Have you placed your code in a 'ready' handler?");
       }
-      html = html.replace(/^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, __bind(function(match, before, settings, after) {
-        var name, value, _ref3, _ref4;
-        features = this.data('htmleditable').features;
-        _ref3 = $.parseJSON("{ " + settings + " }");
-        for (name in _ref3) {
-          value = _ref3[name];
-          if (((_ref4 = features[name]) != null ? _ref4.content : void 0) === true) {
-            this.htmleditable('command', name, value);
-          }
-        }
-        return before + after;
-      }, this));
-      html = getRinsebin().html(html).html();
-      getRinsebin().empty();
-      result = overriddenHtml.call(this, html);
-      updateValue.call(this[0]);
-      return result;
-    }
-    return overriddenHtml.call(this, html);
-  };
-  window.updateValue = function() {
-    var $current, current, data, feature, name, settings, _ref, _ref2;
-    data = $(this).data('htmleditable');
-    $current = $(this).clone(false, false);
-    settings = {};
-    _ref = data.features;
-    for (name in _ref) {
-      feature = _ref[name];
-      if ((_ref2 = feature.output) != null) {
-        _ref2.call($(this), $current);
-      }
-      if (feature.content === true) {
-        settings[name] = $(this).htmleditable('state', name);
-      }
-    }
-    current = $current.html();
-    if (!$.isPlainObject(settings)) {
-      settings = JSON.stringify(settings);
-      current = "<!--htmleditable:state " + settings.slice(1, settings.length - 1) + " -->" + current;
-    }
-    if (data.value !== current) {
-      data.value = current;
-      return $(this).change();
-    }
-  };
-  getState = function(inactive) {
-    var feature, featureState, name, selection, state, value, _ref, _ref2, _ref3;
-    selection = $(this).htmleditable('selection');
-    state = {};
-    _ref = $(this).data('htmleditable').features;
-    for (name in _ref) {
-      feature = _ref[name];
-      featureState = feature != null ? (_ref2 = feature.context) != null ? (_ref3 = _ref2.get) != null ? _ref3.call($(this), selection) : void 0 : void 0 : void 0;
-      if (featureState !== void 0) {
-        if (!$.isPlainObject(featureState)) {
-          value = featureState;
-          (featureState = {})[name] = value;
-        }
-        $.extend(state, featureState);
-      }
-    }
-    return state;
-  };
-  updateState = function() {
-    return setState.call(this, getState.call(this, document.activeElement !== this));
-  };
-  setState = function(state) {
-    var data, delta, key, value, _ref;
-    data = $(this).data('htmleditable');
-    if ((_ref = data.state) == null) {
-      data.state = {};
-    }
-    delta = {};
-    for (key in state) {
-      value = state[key];
-      if (data.state[key] !== value) {
-        data.state[key] = value;
-        delta[key] = value;
-      }
-    }
-    if (!$.isEmptyObject(delta)) {
-      return $(this).trigger('state', delta);
-    }
-  };
-  $rinsebin = $();
-  getRinsebin = function() {
-    if ($rinsebin.length !== 1) {
-      $rinsebin = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;" />').prependTo('body');
-    }
-    return $rinsebin;
-  };
-  $.fn.htmleditable = $.pluginify({
-    init: function(features) {
-      var condition, feature, i, l, load, name, shouldBeIncluded, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5;
       if ($(this).closest(':htmleditable').length > 0 || $(this).parents('[contenteditable="true"]').length > 0) {
         return this;
       }
       rangy.init();
-      features = $.merge(['base', 'multiline'], features != null ? features : []);
+      features = $.merge([linemode, 'base'], features != null ? features : []);
       load = $.merge([], features);
       for (_i = 0, _len = features.length; _i < _len; _i++) {
         feature = features[_i];
-        _ref3 = (_ref = (_ref2 = $.htmleditable[feature]) != null ? _ref2.condition : void 0) != null ? _ref : [];
+        _ref3 = (_ref = (_ref2 = jQuery.htmleditable[feature]) != null ? _ref2.condition : void 0) != null ? _ref : [];
         for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
           condition = _ref3[_j];
           if (condition[0] === '-') {
@@ -3990,7 +3493,7 @@ rangy.createModule("SaveRestore", function(api, module) {
       features = {};
       for (_k = 0, _len3 = load.length; _k < _len3; _k++) {
         l = load[_k];
-        features[l] = $.htmleditable[l];
+        features[l] = jQuery.htmleditable[l];
       }
       $(this).data('htmleditable', {
         features: features
@@ -4006,44 +3509,77 @@ rangy.createModule("SaveRestore", function(api, module) {
 
         }
         return setTimeout(__bind(function() {
-          var html;
+          var cleaned, html;
           $(this).focus();
-          rangy.restoreSelection(selection);
+          cleaned = cleanTree.call($(this), getRinsebin()[0]);
+          getRinsebin().empty().append(cleaned);
           html = getRinsebin().html();
+          getRinsebin().empty();
+          rangy.restoreSelection(selection);
           try {
-            document.execCommand('insertHTML', void 0, html);
+            return document.execCommand('insertHTML', void 0, html);
           } catch (err) {
-            document.selection.createRange().pasteHTML(html);
+            return document.selection.createRange().pasteHTML(html);
           }
-          return getRinsebin().empty();
         }, this));
-      }).bind('focus', function() {
-        try {
-          return document.execCommand('styleWithCSS', void 0, false);
-        } catch (err) {
-
-        }
-      }).bind('input', updateValue).bind('change mouseup focus blur', updateState).bind('keydown', function() {
+      }).bind('input', function() {
+        return $(this).updateValue();
+      }).bind('change mouseup touchend focus blur', function() {
+        return $(this).updateState();
+      }).bind('keydown', function() {
         return setTimeout(__bind(function() {
-          return updateState.call(this);
+          return $(this).updateState();
         }, this));
       });
-      setState.call(this, getState.call(this, true));
-      $(this).html(overriddenHtml.call($(this)));
+      try {
+        document.execCommand('styleWithCSS', void 0, false);
+      } catch (err) {
+
+      }
+      $(this).updateState();
+      $(this).htmleditable('value', $(this).originalHtml());
       _ref4 = $(this).data('htmleditable').features;
       for (name in _ref4) {
         feature = _ref4[name];
-        if (feature != null) {
-          if ((_ref5 = feature.init) != null) {
-            _ref5.call($(this));
-          }
+        if ((_ref5 = feature.init) != null) {
+          _ref5.call($(this));
+        }
+        _ref6 = feature.hotkeys;
+        for (keys in _ref6) {
+          args = _ref6[keys];
+          $(this).bind('keydown', keys, function(e) {
+            var _ref7;
+            e.preventDefault();
+            e.stopPropagation();
+            return (_ref7 = $(this)).htmleditable.apply(_ref7, ['command', name].concat(__slice.call(args)));
+          });
         }
       }
       return this;
     },
-    value: function() {
-      var _ref;
-      return (_ref = $(this)).html.apply(_ref, arguments);
+    value: function(html) {
+      var cleaned, result;
+      if (html == null) {
+        return $(this).data('htmleditable').value;
+      }
+      html = html.replace(/^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, __bind(function(match, before, settings, after) {
+        var features, name, value, _ref, _ref2;
+        features = $(this).data('htmleditable').features;
+        _ref = $.parseJSON("{ " + settings + " }");
+        for (name in _ref) {
+          value = _ref[name];
+          if (((_ref2 = features[name]) != null ? _ref2.content : void 0) === true) {
+            $(this).htmleditable('command', name, value);
+          }
+        }
+        return before + after;
+      }, this));
+      getRinsebin().html(html);
+      cleaned = cleanTree.call($(this), getRinsebin()[0]);
+      getRinsebin().empty();
+      result = $(this).empty().append(cleaned);
+      $(this).updateValue();
+      return result;
     },
     state: function(features) {
       var feature, requested, state, _i, _len, _ref;
@@ -4065,24 +3601,21 @@ rangy.createModule("SaveRestore", function(api, module) {
       return requested;
     },
     command: function() {
-      var args, command, state, value, _ref, _ref2, _ref3;
+      var args, command, feature, state, _ref;
       command = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      state = (_ref = $(this).data('htmleditable').features[command]) != null ? (_ref2 = _ref.context) != null ? (_ref3 = _ref2.set) != null ? _ref3.call.apply(_ref3, [$(this), $(this).htmleditable('selection')].concat(__slice.call(args))) : void 0 : void 0 : void 0;
-      if (state != null) {
-        if (!$.isPlainObject(state)) {
-          value = state;
-          state = {};
-          state[command] = value;
-        }
-        setState.call(this, state);
+      state = {};
+      feature = $(this).data('htmleditable').features[command];
+      if ('command' in feature) {
+        (_ref = feature.command).call.apply(_ref, [$(this)].concat(__slice.call(args)));
+      } else {
+        state[command] = args[0];
       }
-      updateValue.call(this);
-      updateState.call(this);
+      $(this).updateState(state);
+      $(this).updateValue();
       return this;
     },
     selection: function(range) {
       var intersection, r, scope, selection;
-      rangy.init();
       if (arguments.length > 0) {
         if ((range != null ? range.nodeType : void 0) === 1) {
           r = rangy.createRange();
@@ -4090,7 +3623,7 @@ rangy.createModule("SaveRestore", function(api, module) {
           range = r;
         }
         rangy.getSelection().setSingleRange(range);
-        updateState.call(this);
+        $(this).updateState();
         return this;
       }
       selection = rangy.getSelection();
@@ -4107,10 +3640,131 @@ rangy.createModule("SaveRestore", function(api, module) {
       return range;
     }
   });
-  if ((_ref = $.htmleditable) == null) {
-    $.htmleditable = {};
+  if ((_ref = jQuery.htmleditable) == null) {
+    jQuery.htmleditable = {};
   }
-  $.fn.domSplice = function(element) {
+  cleanTree = function(root) {
+    var features, layer;
+    features = this.data('htmleditable').features;
+    layer = function(node) {
+      var $node, child, children, element, feature, i, include, name, processor, processors, result, _i, _len, _ref2;
+      $node = node === root ? $() : $(node);
+      if (node.nodeType === 1) {
+        children = document.createDocumentFragment();
+        _ref2 = node.childNodes;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          child = _ref2[_i];
+          include = layer.call(this, child);
+          if (include != null) {
+            children.appendChild(include);
+          }
+        }
+        processors = (function() {
+          var _results;
+          _results = [];
+          for (name in features) {
+            feature = features[name];
+            _results.push(feature.element);
+          }
+          return _results;
+        })();
+        i = 0;
+        element = void 0;
+        while (i < processors.length) {
+          processor = processors[i++];
+          result = processor != null ? processor.call($node, element, children) : void 0;
+          if ($.isFunction(result)) {
+            processors.push(result);
+          } else if (result != null) {
+            element = result;
+          }
+        }
+        if (element != null) {
+          if (children.hasChildNodes()) {
+            element.appendChild(children);
+          }
+          children = element;
+        }
+        return children;
+      } else if (node.nodeType === 3) {
+        return $node.clone(false, false)[0];
+      }
+    };
+    return layer.call(this, root);
+  };
+  $.fn.updateValue = function() {
+    var $current, current, data, feature, name, settings, _ref2, _ref3, _ref4, _ref5;
+    data = this.data('htmleditable');
+    _ref2 = data.features;
+    for (name in _ref2) {
+      feature = _ref2[name];
+      if ((_ref3 = feature.change) != null) {
+        _ref3.call(this);
+      }
+    }
+    $current = this.clone(false, false);
+    settings = {};
+    _ref4 = data.features;
+    for (name in _ref4) {
+      feature = _ref4[name];
+      if ((_ref5 = feature.output) != null) {
+        _ref5.call(this, $current);
+      }
+      if (feature.content === true) {
+        settings[name] = this.htmleditable('state', name);
+      }
+    }
+    current = $current.html();
+    if (!$.isEmptyObject(settings)) {
+      settings = JSON.stringify(settings);
+      current = "<!--htmleditable:state " + settings.slice(1, settings.length - 1) + " -->" + current;
+    }
+    if (data.value !== current) {
+      data.value = current;
+      return this.change();
+    }
+  };
+  $.fn.updateState = function(state) {
+    var data, delta, feature, featureState, featuresState, key, name, selection, value, _ref2, _ref3, _ref4;
+    selection = this.htmleditable('selection');
+    featuresState = {};
+    _ref2 = this.data('htmleditable').features;
+    for (name in _ref2) {
+      feature = _ref2[name];
+      featureState = feature != null ? (_ref3 = feature.state) != null ? _ref3.call(this) : void 0 : void 0;
+      if (featureState !== void 0) {
+        if (!$.isPlainObject(featureState)) {
+          value = featureState;
+          (featureState = {})[name] = value;
+        }
+        $.extend(featuresState, featureState);
+      }
+    }
+    $.extend(featuresState, state);
+    data = this.data('htmleditable');
+    if ((_ref4 = data.state) == null) {
+      data.state = {};
+    }
+    delta = {};
+    for (key in featuresState) {
+      value = featuresState[key];
+      if (data.state[key] !== value) {
+        data.state[key] = value;
+        delta[key] = value;
+      }
+    }
+    if (!$.isEmptyObject(delta)) {
+      return this.trigger('state', delta);
+    }
+  };
+  $rinsebin = $();
+  getRinsebin = function() {
+    if ($rinsebin.length !== 1) {
+      $rinsebin = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;" />').prependTo('body');
+    }
+    return $rinsebin;
+  };
+  jQuery.fn.domSplice = function(element) {
     var elements;
     elements = [];
     this.each(function() {
@@ -4119,7 +3773,7 @@ rangy.createModule("SaveRestore", function(api, module) {
         $element = $(element);
         elements.push.apply(elements, $element.get());
       }
-      if (this.nodeType === 3 && ((_ref2 = this.nodeName.toLowerCase()) === 'style')) {
+      if (this.nodeType === 1 && ((_ref2 = this.nodeName.toLowerCase()) === 'style' || _ref2 === 'script' || _ref2 === 'iframe')) {
         if (element) {
           return $(this).replaceWith($element);
         } else {
@@ -4153,6 +3807,29 @@ rangy.createModule("SaveRestore", function(api, module) {
 (function() {
   var $;
   $ = jQuery;
+  $.htmleditable["native"] = {
+    element: function(element) {
+      var _ref;
+      if (element != null) {
+        return;
+      }
+      if (this.is('p, div, br') && ((_ref = this.prop('scopeName')) === void 0 || _ref === 'HTML')) {
+        return document.createElement(this[0].nodeName);
+      }
+      if (this.is(':header')) {
+        return function(element) {
+          if (element != null) {
+            return;
+          }
+          return document.createElement('p');
+        };
+      }
+    }
+  };
+}).call(this);
+(function() {
+  var $;
+  $ = jQuery;
   $.htmleditable.singleline = {
     condition: ['-multiline'],
     init: function() {
@@ -4163,96 +3840,130 @@ rangy.createModule("SaveRestore", function(api, module) {
   };
 }).call(this);
 (function() {
-  /**
-  
-  * Defined in `$.htmleditable.multiline`.
-  * Will not be loaded if [singleline](#docs.features.singleline) is enabled.
-  * Allows `p`, `div` and `br`.
-  
-  This feature makes sure that new lines can be created. It is enabled by default
-  because we need either multiline or singleline support, and multiline is the
-  most sensible default.
-  
-  */
   var $;
   $ = jQuery;
-  $.htmleditable.multiline = {
-    condition: ['-singleline'],
-    allow: function() {
-      if (this.is('p, div, br')) {
-        return true;
+  $.htmleditable.linebreaks = {
+    element: function(element) {
+      var _ref, _ref2, _ref3;
+      if (this.length === 0 || (element != null)) {
+        return;
       }
-      if (this.is(':header')) {
-        return function(element, remove) {
-          if (remove) {
-            return $(element).wrap('<p />');
+      if (this.is('br')) {
+        return document.createElement('br');
+      }
+      if (this.is('p, :header') && ((_ref = (_ref2 = this.prop('prefix')) != null ? _ref2 : this.prop('scopeName')) === void 0 || _ref === null || _ref === 'HTML')) {
+        return function(element, children) {
+          if (element != null) {
+            return;
+          }
+          children.appendChild(document.createElement('br'));
+          children.appendChild(document.createElement('br'));
+        };
+      }
+      if ((_ref3 = this.css('display')) === 'block' || _ref3 === 'list-item' || _ref3 === 'table-row') {
+        return function(element, children) {
+          var last;
+          if (element != null) {
+            return;
+          }
+          last = children.lastChild;
+          while ((last != null) && last.nodeType === 3 && /^\s*$/.test(last.data)) {
+            last = last.previousSibling;
+          }
+          if (!$(last).is('br')) {
+            children.appendChild(document.createElement('br'));
           }
         };
       }
     },
-    init: function() {}
+    init: function() {
+      return $('head').append("<style>			#" + (this.prop('id')) + " p {				margin-top: 0;				margin-bottom: 0;			}		</style>");
+    },
+    change: function() {
+      var sel;
+      if ($(this).find('div, p').length > 0) {
+        sel = rangy.saveSelection();
+        $(this).find('div').each(function() {
+          var prev;
+          prev = $(this)[0].previousSibling;
+          if ((prev != null) && !$(prev).is('br')) {
+            $(this).before('<br>');
+          }
+          return $(this).domSplice();
+        });
+        $(this).find('p').each(function() {
+          var _ref;
+          if (!(((_ref = $(this)[0].previousSibling) != null ? _ref.nodeType : void 0) === 1 && $(this).prev().is('br'))) {
+            $(this).after('<br>');
+          }
+          return $(this).domSplice();
+        });
+        return rangy.restoreSelection(sel);
+      }
+    }
   };
 }).call(this);
 (function() {
-  var $, $testbed, getTestbed, tag;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var $, name, tag;
   $ = jQuery;
-  tag = 'b';
-  $testbed = $();
-  getTestbed = function() {
-    if ($testbed.length !== 1) {
-      $testbed = $('<div contenteditable="true" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo('body');
+  name = void 0;
+  tag = function() {
+    var $testbed, range;
+    if (name != null) {
+      return name;
     }
-    return $testbed;
-  };
-  $(function() {
-    var range;
-    $testbed = getTestbed();
-    rangy.init();
+    $testbed = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo('body');
     range = rangy.createRange();
     range.selectNodeContents($testbed[0]);
     rangy.getSelection().setSingleRange(range);
-    $testbed.focus();
     document.execCommand('bold', null, null);
-    tag = $testbed.children()[0].nodeName;
-    return $testbed.remove();
-  });
+    name = $testbed.children()[0].nodeName;
+    $testbed.remove();
+    return name != null ? name : 'b';
+  };
   $.htmleditable.bold = {
-    allow: function() {
-      if (this.is(tag)) {
-        return true;
+    element: function(element, children) {
+      if (this.length === 0 || (element != null)) {
+        return;
       }
-      if (this.is('strong')) {
-        return document.createElement(tag);
+      if (this.is('strong, b')) {
+        return document.createElement(tag());
       }
-      if (this.is(':header')) {
-        return function(element, remove) {
-          if (remove) {
-            return $(element).contents().wrapAll("<" + tag + " />");
+      if (this.is(':header') && $(children.childNodes).filter(tag()).length === 0) {
+        return function(element, children) {
+          var bold, child, next;
+          if ($(element).is(':header')) {
+            return;
+          }
+          bold = document.createElement(tag());
+          child = children.lastChild;
+          while (child != null) {
+            next = child.previousSibling;
+            if (bold.hasChildNodes() || !$(child).is('br') && (child.nodeType !== 3 || !/^\s*$/.test(child.data))) {
+              if (!bold.hasChildNodes()) {
+                children.insertBefore(bold, child);
+              }
+              bold.insertBefore(child, bold.firstChild);
+            }
+            child = next;
           }
         };
       }
     },
     output: function($tree) {
-      return $tree.find(tag).domSplice('<strong />');
+      return $tree.find(tag()).domSplice('<strong />');
     },
-    init: function() {
-      return this.bind('keydown', 'ctrl+b meta+b', __bind(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return this.htmleditable('command', 'bold');
-      }, this));
-    },
-    context: {
-      get: function(selection) {
-        if (selection == null) {
-          return null;
-        }
-        return document.queryCommandState('bold');
-      },
-      set: function() {
-        document.execCommand('bold', null, null);
+    state: function() {
+      if ($(this).htmleditable('selection') == null) {
+        return null;
       }
+      return document.queryCommandState('bold');
+    },
+    hotkeys: {
+      'ctrl+b meta+b': []
+    },
+    command: function() {
+      return document.execCommand('bold', null, null);
     }
   };
 }).call(this);
@@ -4260,46 +3971,42 @@ rangy.createModule("SaveRestore", function(api, module) {
   var $;
   $ = jQuery;
   $.htmleditable.link = {
-    allow: function(attrs) {
-      if (this.is('a') && (attrs != null ? attrs.href.value : void 0)) {
-        this.attr('href', attrs.href.value);
-        return true;
+    element: function(element) {
+      var link;
+      if (this.length === 0 || (element != null)) {
+        return;
+      }
+      if (this.is('a[href^="http://"]')) {
+        link = document.createElement('a');
+        link.setAttribute('href', this.attr('href'));
+        return link;
       }
     },
-    init: function() {
-      return this.bind('DOMCharacterDataModified', function(e) {
-        var $target;
-        $target = $(e.target);
-        if ($target.is('a') && e.originalEvent.prevValue === $target.attr('href')) {
-          $target.attr('href', e.originalEvent.newValue);
-          return updateValue.call(this);
-        }
-      });
+    init: function() {},
+    state: function() {
+      var selection;
+      selection = $(this).htmleditable('selection');
+      if (selection == null) {
+        return null;
+      }
+      return $(selection.collapsed ? selection.commonAncestorContainer : selection.getNodes()).closest('a').get();
     },
-    context: {
-      get: function(selection) {
-        if (selection == null) {
-          return null;
-        }
-        return $(selection.collapsed ? selection.commonAncestorContainer : selection.getNodes()).closest('a').get();
-      },
-      set: function(selection, url) {
-        var state;
-        state = $(this).htmleditable('state', 'link');
-        if (!((state != null) && state.length === 0)) {
-          return;
-        }
-        if (url == null) {
-          url = 'http://';
-        }
-        if (!selection.collapsed) {
-          document.execCommand('createLink', null, url);
-        } else {
-          try {
-            document.execCommand('insertHTML', null, "<a href=\"" + url + "\">" + url + "</a>");
-          } catch (err) {
+    command: function(url) {
+      var selection;
+      selection = $(this).htmleditable('selection');
+      if (selection == null) {
+        return;
+      }
+      if (url == null) {
+        url = 'http://';
+      }
+      if (!selection.collapsed) {
+        return document.execCommand('createLink', null, url);
+      } else {
+        try {
+          return document.execCommand('insertHTML', null, "<a href=\"" + url + "\">" + url + "</a>");
+        } catch (err) {
 
-          }
         }
       }
     }
@@ -4309,72 +4016,58 @@ rangy.createModule("SaveRestore", function(api, module) {
   var $;
   $ = jQuery;
   $.htmleditable.list = {
-    condition: ['multiline'],
-    allow: function(attrs) {
-      var value, _i, _len, _ref, _ref2, _ref3, _ref4;
-      if (this.is('ul, ol, li')) {
-        return true;
-      }
-      _ref4 = (_ref = attrs != null ? (_ref2 = attrs["class"]) != null ? (_ref3 = _ref2.value) != null ? _ref3.split(' ') : void 0 : void 0 : void 0) != null ? _ref : [];
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        value = _ref4[_i];
-        if (/^MsoListParagraph\S*$/.test(value)) {
-          return function(element) {
-            var $element;
-            $element = $(element).wrap('<li />').parent();
-            if ($element.prev().is('ul')) {
-              $element.appendTo($element.prev());
-            } else {
-              $element.wrap('<ul />');
+    element: function(element, children) {
+      var $child, child, list, name, next, _i, _len, _ref, _ref2, _ref3;
+      if (!this.is('ul, ol')) {
+        list = document.createElement('ul');
+        child = children.firstChild;
+        while (child != null) {
+          $child = $(child);
+          next = child.nextSibling;
+          if ($child.is('li')) {
+            if (!list.hasChildNodes()) {
+              children.insertBefore(list, child);
             }
-            return true;
-          };
+            list.appendChild(child);
+            $child.html($child.html().replace(/^\S\.?(?:&nbsp;)+([\s\S]+)$/, "$1"));
+          } else if (list.hasChildNodes()) {
+            if (child.nodeType === 3 && /^\s*$/.test(child.data)) {
+              children.removeChild(child);
+            } else {
+              list = document.createElement('ul');
+            }
+          }
+          child = next;
         }
       }
-    },
-    context: {
-      get: function() {
-        return {
-          orderedList: document.queryCommandState('insertOrderedList'),
-          unorderedList: document.queryCommandState('insertUnorderedList')
-        };
-      },
-      set: function(selection, ordered) {
-        return document.execCommand("insert" + (ordered ? 'Ordered' : 'Unordered') + "List");
+      if (this.length === 0) {
+        return;
       }
-    }
-  };
-}).call(this);
-(function() {
-  var $;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-  $ = jQuery;
-  $.htmleditable.margins = {
-    condition: ['multiline'],
-    output: function($tree) {
-      if (!this.htmleditable('state', 'margins')) {
-        return $tree.find('p, ul, ol').css({
-          'margin-top': 0,
-          'margin-bottom': 0
-        });
-      }
-    },
-    init: function() {
-      $('head').append("<style type=\"text/css\">			#" + (this.prop('id')) + ".no-margins p, #" + (this.prop('id')) + ".no-margins ul, #" + (this.prop('id')) + ".no-margins ol {				margin-top: 0;				margin-bottom: 0;			}		</style>");
-      this.bind('state', __bind(function(e, state) {
-        if ('margins' in state) {
-          return this["" + (state.margins === true ? 'remove' : 'add') + "Class"]('no-margins');
+      _ref3 = (_ref = (_ref2 = this.attr('class')) != null ? _ref2.split(' ') : void 0) != null ? _ref : [];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        name = _ref3[_i];
+        if (/^MsoListParagraph\S*$/.test(name)) {
+          return document.createElement('li');
         }
-      }, this));
-      if (this.htmleditable('state', 'margins') === null) {
-        return this.htmleditable('command', 'margins', false);
+      }
+      if (element != null) {
+        return;
+      }
+      if (this.is('ul, ol, li')) {
+        return document.createElement(this.prop('nodeName'));
       }
     },
-    content: true,
-    context: {
-      set: function(selection, margins) {
-        return margins != null ? margins : !this.htmleditable('state', 'margins');
+    state: function() {
+      if ($(this).htmleditable('selection') == null) {
+        return null;
       }
+      return {
+        orderedList: document.queryCommandState('insertOrderedList'),
+        unorderedList: document.queryCommandState('insertUnorderedList')
+      };
+    },
+    command: function(ordered) {
+      return document.execCommand("insert" + (ordered ? 'Ordered' : 'Unordered') + "List");
     }
   };
 }).call(this);

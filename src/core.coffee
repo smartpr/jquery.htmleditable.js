@@ -79,8 +79,6 @@ jQuery.fn.htmleditable = $.pluginify
 				setTimeout =>
 					$(@).focus()
 
-					console.log getRinsebin().html()
-
 					cleaned = cleanTree.call $(@), getRinsebin()[0]
 					getRinsebin().empty().append cleaned
 					html = getRinsebin().html()
