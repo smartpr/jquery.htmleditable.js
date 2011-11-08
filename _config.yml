@@ -1,7 +1,10 @@
 # This is all that needs to be changed when deploying to production
-projects_url: http://dev
+# TODO: Let build tool (currently `dev`) deal with switching this setting.
+projects_url: http://projects.smart.pr
+project_path: /jquery.htmleditable.js
+#projects_url: http://dev
+#project_path: /jquery.htmleditable.js/_site
 
 repository: https://github.com/smartpr/jquery.htmleditable.js
 version: master
 pygments: true
-project_path: /jquery.htmleditable.js/_site
