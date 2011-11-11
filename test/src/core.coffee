@@ -14,20 +14,45 @@ describe "$.fn.htmleditable()", ->
 	
 	describe "init", ->
 
-		it "explicitly", ->
-			expect($elem.htmleditable('init').get()).toEqual $elem.get()
+		it "takes line mode and features", ->
+			expect($elem.htmleditable('init', 'linebreaks', ['bold']).get()).toEqual $elem.get()
 			expect($elem).toBe ':htmleditable'
 
-		it "implicitly", ->
-			expect($elem.htmleditable().get()).toEqual $elem.get()
-			expect($elem).toBe ':htmleditable'
+		it "makes features an optional argument", ->
+			$elem.htmleditable 'init', 'linebreaks'
+			expect(key for key of $elem.data('htmleditable').features).toEqual ['linebreaks', 'base']
 		
+		it "makes line mode an optional argument", ->
+			$elem.htmleditable 'init', ['bold']
+			expect(key for key of $elem.data('htmleditable').features).toEqual ['native', 'base', 'bold']
+		
+		it "can be invoked implicitly (although not recommended if first argument is a string)", ->
+			expect($elem.htmleditable()).toBe ':htmleditable'
+
 		# TODO: Test with features, syntax similar to 'state'.
 
 		xit "cancels features that are invalidated by later features", ->
 			spyOn $.htmleditable.multiline, 'init'
 			$elem.htmleditable ['singleline']
 			expect($.htmleditable.multiline.init).not.toHaveBeenCalled()
+		
+		it "registers hotkeys", ->
+			spyOn $.htmleditable.bold, 'command'
+			spyOn $.htmleditable.list, 'command'
+			$elem.
+				# Initialize with multiple features that define a command, so
+				# we are also verifying that the correct command is invoked.
+				htmleditable(['bold', 'list']).
+				trigger
+					type: 'keydown'
+					target: $elem[0]
+					which: 66
+					altKey: no
+					ctrlKey: no
+					metaKey: yes
+					shiftKey: no
+			expect($.htmleditable.bold.command).toHaveBeenCalled()
+			expect($.htmleditable.list.command).not.toHaveBeenCalled()
 	
 	describe "value", ->
 

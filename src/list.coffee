@@ -50,4 +50,5 @@ $.htmleditable.list =
 		unorderedList: document.queryCommandState 'insertUnorderedList'
 	
 	command: (ordered) ->
+		console.log 'command: list', ordered
 		document.execCommand "insert#{ if ordered then 'Ordered' else 'Unordered' }List"

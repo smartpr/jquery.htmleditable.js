@@ -25,16 +25,15 @@
 		that we would like to have a guarantee that this piece of interface is
 		*never* displayed, not even briefly.
 		-->
-		<script type="text/javascript" src="http://dev/jquery.htmleditable.js/_site/assets/jquery.browser.min.js"></script>
-		<script type="text/javascript" src="http://dev/jquery.htmleditable.js/_site/assets/modernizr.js"></script>
+		<script type="text/javascript" src="http://projects.smart.pr/jquery.htmleditable.js/assets/jquery.browser.min.js"></script>
+		<script type="text/javascript" src="http://projects.smart.pr/jquery.htmleditable.js/assets/modernizr.js"></script>
 		<!--
 		TODO: Styling before any content, yet it looks like Firefox is building
 		the document before the styling has been applied. The result is a flash
 		of unstyled content. Hmm, how can we prevent this?
 		-->
-		<!-- <link class="theme" rel="stylesheet" type="text/css" href="http://projects.smart.pr/project-site.themes/smartpr-oss.css" /> -->
-		<link class="theme" rel="stylesheet" type="text/css" href="http://dev/project-site.themes/smartpr-oss.css" />
-		<link rel="stylesheet" type="text/css" href="http://dev/jquery.htmleditable.js/_site/assets/site.css" />
+		<link class="theme" rel="stylesheet" type="text/css" href="http://projects.smart.pr/project-site.themes/smartpr-oss.css" />
+		<link rel="stylesheet" type="text/css" href="http://projects.smart.pr/jquery.htmleditable.js/assets/site.css" />
 	</head>
 	<body>
 		<header>
@@ -43,11 +42,11 @@
 		</header>
 		
 		<nav>
-			<a href="http://dev/jquery.htmleditable.js/_site/index.html">overview</a>
-			<a href="http://dev/jquery.htmleditable.js/_site/demo.html" class="selected">demo</a>
+			<a href="http://projects.smart.pr/jquery.htmleditable.js/index.html">overview</a>
+			<a href="http://projects.smart.pr/jquery.htmleditable.js/demo.html" class="selected">demo</a>
 			<a href="https://github.com/smartpr/jquery.htmleditable.js/raw/master/jquery.htmleditable.standalone.min.js">download</a>
-			<a href="http://dev/jquery.htmleditable.js/_site/doc/index.html">documentation</a>
-			<a href="http://dev/jquery.htmleditable.js/_site/test.html">tests</a>
+			<a href="http://projects.smart.pr/jquery.htmleditable.js/doc/index.html">documentation</a>
+			<a href="http://projects.smart.pr/jquery.htmleditable.js/test.html">tests</a>
 			<a href="https://github.com/smartpr/jquery.htmleditable.js">development</a>
 		</nav>
 
@@ -77,16 +76,20 @@
 
 <p>It can be used as a <code>textarea</code> replacement, including resizing corner tip (in browsers that have them on text areas).</p>
 <style>
-  html.gecko #demo-area {
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-area {
     outline: none;
   }
+  /* TODO: Feature detect `appearance`, if feasible. */
   html.msie #demo-area {
     border: 1px solid #7f9db9;
   }
   #demo-area {
-    -moz-appearance: textfield;
-    -webkit-appearance: textfield;
-    appearance: textfield;
+    /* Each of the following properties has a different set of allowed values,
+       as defined by the corresponding specifications. */
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    appearance: field;
     /* Enable scrollbars when necessary. */
     overflow-x: auto;
     overflow-y: auto;
@@ -98,22 +101,306 @@
     height: 5em;
     padding: .5em;
   }
-  #demo-area > p:last-child {
-    margin-bottom: 0;
-  }
 </style><div id='demo-area'>
-  <div>
-  	<p>
-  		Yeah this was <strong>already</strong> in here...
-  	</p>
-  </div>
-  Last line
+  Yeah <b>this</b> was <strong>already</strong> in here...
 </div><script>
-  $(function() {
-    $('#demo-area').htmleditable('linebreaks', ['bold', 'link', 'list']);
+  jQuery(function($) {
+    $('#demo-area').htmleditable('linebreaks', ['bold']);
   });
-</script>
+</script><details>
+<summary>Source</summary>
+
+<div class='highlight'><pre><code class='html'><span class='nt'>&lt;style&gt;</span>
+  <span class='c'>/* TODO: Is this an issue with Gecko, or with Firefox? */</span>
+  <span class='nt'>html</span><span class='nc'>.gecko.mac</span> <span class='nf'>#demo-area</span> <span class='p'>{</span>
+    <span class='k'>outline</span><span class='o'>:</span> <span class='k'>none</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='c'>/* TODO: Feature detect `appearance`, if feasible. */</span>
+  <span class='nt'>html</span><span class='nc'>.msie</span> <span class='nf'>#demo-area</span> <span class='p'>{</span>
+    <span class='k'>border</span><span class='o'>:</span> <span class='m'>1px</span> <span class='k'>solid</span> <span class='m'>#7f9db9</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-area</span> <span class='p'>{</span>
+    <span class='c'>/* Each of the following properties has a different set of allowed values,</span>
+<span class='c'>       as defined by the corresponding specifications. */</span>
+    <span class='o'>-</span><span class='n'>moz</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textfield</span><span class='o'>-</span><span class='n'>multiline</span><span class='p'>;</span>
+    <span class='o'>-</span><span class='n'>webkit</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textarea</span><span class='p'>;</span>
+    <span class='n'>appearance</span><span class='o'>:</span> <span class='n'>field</span><span class='p'>;</span>
+    <span class='c'>/* Enable scrollbars when necessary. */</span>
+    <span class='k'>overflow-x</span><span class='o'>:</span> <span class='k'>auto</span><span class='p'>;</span>
+    <span class='k'>overflow-y</span><span class='o'>:</span> <span class='k'>auto</span><span class='p'>;</span>
+    <span class='c'>/* Like `textarea`&#39;s default behavior, make it resizable in both</span>
+<span class='c'>       dimensions (if supported by the browser). */</span>
+    <span class='n'>resize</span><span class='o'>:</span> <span class='k'>both</span><span class='p'>;</span>
+    <span class='c'>/* Give it some initial size below which it will not be resizable. */</span>
+    <span class='k'>width</span><span class='o'>:</span> <span class='m'>20em</span><span class='p'>;</span>
+    <span class='k'>height</span><span class='o'>:</span> <span class='m'>5em</span><span class='p'>;</span>
+    <span class='k'>padding</span><span class='o'>:</span> <span class='m'>.5em</span><span class='p'>;</span>
+  <span class='p'>}</span>
+<span class='nt'>&lt;/style&gt;</span>
+
+<span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;demo-area&quot;</span><span class='nt'>&gt;</span>
+  Yeah <span class='nt'>&lt;b&gt;</span>this<span class='nt'>&lt;/b&gt;</span> was <span class='nt'>&lt;strong&gt;</span>already<span class='nt'>&lt;/strong&gt;</span> in here...
+<span class='nt'>&lt;/div&gt;</span>
+
+<span class='nt'>&lt;script&gt;</span>
+  <span class='nx'>jQuery</span><span class='p'>(</span><span class='kd'>function</span><span class='p'>(</span><span class='nx'>$</span><span class='p'>)</span> <span class='p'>{</span>
+    <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-area&#39;</span><span class='p'>).</span><span class='nx'>htmleditable</span><span class='p'>(</span><span class='s1'>&#39;linebreaks&#39;</span><span class='p'>,</span> <span class='p'>[</span><span class='s1'>&#39;bold&#39;</span><span class='p'>]);</span>
+  <span class='p'>});</span>
+<span class='nt'>&lt;/script&gt;</span>
+</code></pre>
+</div>
+
+
+</details>
+<h3 id='rich_text_input'>Rich text input</h3>
+
+<p>Similar to the rich text area, we can mimic a regular text input. Note the auto-resizing coolness!</p>
+<style>
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-input {
+    outline: none;
+  }
+  /* TODO: Feature detect `appearance`, if feasible. */
+  html.msie #demo-input {
+    border: 1px solid #7f9db9;
+  }
+  #demo-input {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: field;
+    overflow-y: hidden;
+    min-width: 20em;
+    padding: .3em;
+    display: inline-block;
+  }
+</style><div id='demo-input'>
+  Yeah this was <strong>already</strong> in here...
+</div><script>
+  jQuery(function($) {
+    $('#demo-input').htmleditable('singleline', ['bold']);
+  });
+</script><details>
+<summary>Source</summary>
+
+<div class='highlight'><pre><code class='html'><span class='nt'>&lt;style&gt;</span>
+  <span class='c'>/* TODO: Is this an issue with Gecko, or with Firefox? */</span>
+  <span class='nt'>html</span><span class='nc'>.gecko.mac</span> <span class='nf'>#demo-input</span> <span class='p'>{</span>
+    <span class='k'>outline</span><span class='o'>:</span> <span class='k'>none</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='c'>/* TODO: Feature detect `appearance`, if feasible. */</span>
+  <span class='nt'>html</span><span class='nc'>.msie</span> <span class='nf'>#demo-input</span> <span class='p'>{</span>
+    <span class='k'>border</span><span class='o'>:</span> <span class='m'>1px</span> <span class='k'>solid</span> <span class='m'>#7f9db9</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-input</span> <span class='p'>{</span>
+    <span class='o'>-</span><span class='n'>moz</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textfield</span><span class='p'>;</span>
+    <span class='o'>-</span><span class='n'>webkit</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textfield</span><span class='p'>;</span>
+    <span class='n'>appearance</span><span class='o'>:</span> <span class='n'>field</span><span class='p'>;</span>
+    <span class='k'>overflow-y</span><span class='o'>:</span> <span class='k'>hidden</span><span class='p'>;</span>
+    <span class='k'>min-width</span><span class='o'>:</span> <span class='m'>20em</span><span class='p'>;</span>
+    <span class='k'>padding</span><span class='o'>:</span> <span class='m'>.3em</span><span class='p'>;</span>
+    <span class='k'>display</span><span class='o'>:</span> <span class='k'>inline</span><span class='o'>-</span><span class='k'>block</span><span class='p'>;</span>
+  <span class='p'>}</span>
+<span class='nt'>&lt;/style&gt;</span>
+
+<span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;demo-input&quot;</span><span class='nt'>&gt;</span>
+  Yeah this was <span class='nt'>&lt;strong&gt;</span>already<span class='nt'>&lt;/strong&gt;</span> in here...
+<span class='nt'>&lt;/div&gt;</span>
+
+<span class='nt'>&lt;script&gt;</span>
+  <span class='nx'>jQuery</span><span class='p'>(</span><span class='kd'>function</span><span class='p'>(</span><span class='nx'>$</span><span class='p'>)</span> <span class='p'>{</span>
+    <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-input&#39;</span><span class='p'>).</span><span class='nx'>htmleditable</span><span class='p'>(</span><span class='s1'>&#39;singleline&#39;</span><span class='p'>,</span> <span class='p'>[</span><span class='s1'>&#39;bold&#39;</span><span class='p'>]);</span>
+  <span class='p'>});</span>
+<span class='nt'>&lt;/script&gt;</span>
+</code></pre>
+</div>
+
+
+</details>
+<h3 id='simple_rich_text_editor'>Simple rich text editor</h3>
+
+<p>Or leverage the fact that we are dealing with a regular block element and let it fit the content. (An entirely browser-powered auto-resizing text area, how cool is that?!)</p>
+<style>
+  /* TODO: Is this an issue with Gecko, or with Firefox? */
+  html.gecko.mac #demo-simple {
+    outline: none;
+  }
+  /* TODO: Feature detect `appearance`, if feasible. */
+  html.msie #demo-simple {
+    border: 1px solid #7f9db9;
+  }
+  #demo-simple {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: field;
+    overflow-x: auto;
+    width: 95%;
+    padding: .5em;
+  }
+  #demo-simple-tools {
+    margin-bottom: .5em;
+  }
+  #demo-simple-tools [data-command].active {
+    font-weight: bold;
+  }
+</style><div id='demo-simple-tools'>
+  <button data-command='bold'>Bold</button>
+</div><div id='demo-simple'>
+  <p>Yeah <b>this</b> was <strong>already</strong> in here...</p>
+  <p>Yup</p>
+</div><script>
+  jQuery(function($) {
+
+    $('#demo-simple').
+      on('state', function(e, state) {
+        for (key in state) {
+          $('#demo-simple-tools [data-command="' + key + '"]').
+            attr('disabled', state[key] === null)
+            [(state[key] === true ? 'add' : 'remove') + 'Class']('active');
+        }
+      }).
+      htmleditable('native', ['bold', 'link', 'list']);
+    
+    $('#demo-simple-tools [data-command]').
+      on('mousedown', function(e) {
+        e.preventDefault();
+      }).
+      on('click', function() {
+        $('#demo-simple').htmleditable('command', $(this).data('command'));
+      });
+    
+  });
+</script><details>
+<summary>Source</summary>
+
+<div class='highlight'><pre><code class='html'><span class='nt'>&lt;style&gt;</span>
+  <span class='c'>/* TODO: Is this an issue with Gecko, or with Firefox? */</span>
+  <span class='nt'>html</span><span class='nc'>.gecko.mac</span> <span class='nf'>#demo-simple</span> <span class='p'>{</span>
+    <span class='k'>outline</span><span class='o'>:</span> <span class='k'>none</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='c'>/* TODO: Feature detect `appearance`, if feasible. */</span>
+  <span class='nt'>html</span><span class='nc'>.msie</span> <span class='nf'>#demo-simple</span> <span class='p'>{</span>
+    <span class='k'>border</span><span class='o'>:</span> <span class='m'>1px</span> <span class='k'>solid</span> <span class='m'>#7f9db9</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-simple</span> <span class='p'>{</span>
+    <span class='o'>-</span><span class='n'>moz</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textfield</span><span class='p'>;</span>
+    <span class='o'>-</span><span class='n'>webkit</span><span class='o'>-</span><span class='n'>appearance</span><span class='o'>:</span> <span class='n'>textfield</span><span class='p'>;</span>
+    <span class='n'>appearance</span><span class='o'>:</span> <span class='n'>field</span><span class='p'>;</span>
+    <span class='k'>overflow-x</span><span class='o'>:</span> <span class='k'>auto</span><span class='p'>;</span>
+    <span class='k'>width</span><span class='o'>:</span> <span class='m'>95%</span><span class='p'>;</span>
+    <span class='k'>padding</span><span class='o'>:</span> <span class='m'>.5em</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-simple-tools</span> <span class='p'>{</span>
+    <span class='k'>margin-bottom</span><span class='o'>:</span> <span class='m'>.5em</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-simple-tools</span> <span class='o'>[</span><span class='nt'>data-command</span><span class='o'>]</span><span class='nc'>.active</span> <span class='p'>{</span>
+    <span class='k'>font-weight</span><span class='o'>:</span> <span class='k'>bold</span><span class='p'>;</span>
+  <span class='p'>}</span>
+<span class='nt'>&lt;/style&gt;</span>
+
+<span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;demo-simple-tools&quot;</span><span class='nt'>&gt;</span>
+  <span class='nt'>&lt;button</span> <span class='na'>data-command=</span><span class='s'>&quot;bold&quot;</span><span class='nt'>&gt;</span>Bold<span class='nt'>&lt;/button&gt;</span>
+<span class='nt'>&lt;/div&gt;</span>
+<span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;demo-simple&quot;</span><span class='nt'>&gt;</span>
+  <span class='nt'>&lt;p&gt;</span>Yeah <span class='nt'>&lt;b&gt;</span>this<span class='nt'>&lt;/b&gt;</span> was <span class='nt'>&lt;strong&gt;</span>already<span class='nt'>&lt;/strong&gt;</span> in here...<span class='nt'>&lt;/p&gt;</span>
+  <span class='nt'>&lt;p&gt;</span>Yup<span class='nt'>&lt;/p&gt;</span>
+<span class='nt'>&lt;/div&gt;</span>
+
+<span class='nt'>&lt;script&gt;</span>
+  <span class='nx'>jQuery</span><span class='p'>(</span><span class='kd'>function</span><span class='p'>(</span><span class='nx'>$</span><span class='p'>)</span> <span class='p'>{</span>
+
+    <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-simple&#39;</span><span class='p'>).</span>
+      <span class='nx'>on</span><span class='p'>(</span><span class='s1'>&#39;state&#39;</span><span class='p'>,</span> <span class='kd'>function</span><span class='p'>(</span><span class='nx'>e</span><span class='p'>,</span> <span class='nx'>state</span><span class='p'>)</span> <span class='p'>{</span>
+        <span class='k'>for</span> <span class='p'>(</span><span class='nx'>key</span> <span class='k'>in</span> <span class='nx'>state</span><span class='p'>)</span> <span class='p'>{</span>
+          <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-simple-tools [data-command=&quot;&#39;</span> <span class='o'>+</span> <span class='nx'>key</span> <span class='o'>+</span> <span class='s1'>&#39;&quot;]&#39;</span><span class='p'>).</span>
+            <span class='nx'>attr</span><span class='p'>(</span><span class='s1'>&#39;disabled&#39;</span><span class='p'>,</span> <span class='nx'>state</span><span class='p'>[</span><span class='nx'>key</span><span class='p'>]</span> <span class='o'>===</span> <span class='kc'>null</span><span class='p'>)</span>
+            <span class='p'>[(</span><span class='nx'>state</span><span class='p'>[</span><span class='nx'>key</span><span class='p'>]</span> <span class='o'>===</span> <span class='kc'>true</span> <span class='o'>?</span> <span class='s1'>&#39;add&#39;</span> <span class='o'>:</span> <span class='s1'>&#39;remove&#39;</span><span class='p'>)</span> <span class='o'>+</span> <span class='s1'>&#39;Class&#39;</span><span class='p'>](</span><span class='s1'>&#39;active&#39;</span><span class='p'>);</span>
+        <span class='p'>}</span>
+      <span class='p'>}).</span>
+      <span class='nx'>htmleditable</span><span class='p'>(</span><span class='s1'>&#39;native&#39;</span><span class='p'>,</span> <span class='p'>[</span><span class='s1'>&#39;bold&#39;</span><span class='p'>,</span> <span class='s1'>&#39;link&#39;</span><span class='p'>,</span> <span class='s1'>&#39;list&#39;</span><span class='p'>]);</span>
+    
+    <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-simple-tools [data-command]&#39;</span><span class='p'>).</span>
+      <span class='nx'>on</span><span class='p'>(</span><span class='s1'>&#39;mousedown&#39;</span><span class='p'>,</span> <span class='kd'>function</span><span class='p'>(</span><span class='nx'>e</span><span class='p'>)</span> <span class='p'>{</span>
+        <span class='nx'>e</span><span class='p'>.</span><span class='nx'>preventDefault</span><span class='p'>();</span>
+      <span class='p'>}).</span>
+      <span class='nx'>on</span><span class='p'>(</span><span class='s1'>&#39;click&#39;</span><span class='p'>,</span> <span class='kd'>function</span><span class='p'>()</span> <span class='p'>{</span>
+        <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-simple&#39;</span><span class='p'>).</span><span class='nx'>htmleditable</span><span class='p'>(</span><span class='s1'>&#39;command&#39;</span><span class='p'>,</span> <span class='nx'>$</span><span class='p'>(</span><span class='k'>this</span><span class='p'>).</span><span class='nx'>data</span><span class='p'>(</span><span class='s1'>&#39;command&#39;</span><span class='p'>));</span>
+      <span class='p'>});</span>
+    
+  <span class='p'>});</span>
+<span class='nt'>&lt;/script&gt;</span>
+</code></pre>
+</div>
+
+
+</details>
+<h3 id='word_processor_wannabe'>Word processor wannabe</h3>
+
+<p>&#8230;</p>
+
+<h3 id='inline_editing'>Inline editing</h3>
+<style>
+  #demo-inline .inline {
+    outline: none;
+  }
+  #demo-inline:hover .inline {
+    background-color: LemonChiffon;
+  }
+  #demo-inline .inline:focus {
+    background-color: Yellow;
+  }
+</style><div id='demo-inline'>
+  You can blend in <span class='inline'>editable areas</span> seamlessly
+  inside any content, including in <a href='http://smart.pr/'>places where
+  <span class='inline'>you might <strong>not</strong> be expecting</span>
+  them</a>. <em>Officially <span class='inline'>amazing</span>, isn't it?!</em>
+  You can apply formatting as usual &ndash; try <kbd>⌘B</kbd> for bold.
+</div><script>
+  jQuery(function($) {
+    $('#demo-inline .inline').
+      on('click', function(e) {
+        e.preventDefault();
+      }).
+      htmleditable('singleline', ['bold']);
+  });
+</script><details>
+<summary>Source</summary>
+
+<div class='highlight'><pre><code class='html'><span class='nt'>&lt;style&gt;</span>
+  <span class='nf'>#demo-inline</span> <span class='nc'>.inline</span> <span class='p'>{</span>
+    <span class='k'>outline</span><span class='o'>:</span> <span class='k'>none</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-inline</span><span class='nd'>:hover</span> <span class='nc'>.inline</span> <span class='p'>{</span>
+    <span class='k'>background-color</span><span class='o'>:</span> <span class='n'>LemonChiffon</span><span class='p'>;</span>
+  <span class='p'>}</span>
+  <span class='nf'>#demo-inline</span> <span class='nc'>.inline</span><span class='nd'>:focus</span> <span class='p'>{</span>
+    <span class='k'>background-color</span><span class='o'>:</span> <span class='n'>Yellow</span><span class='p'>;</span>
+  <span class='p'>}</span>
+<span class='nt'>&lt;/style&gt;</span>
+
+<span class='nt'>&lt;div</span> <span class='na'>id=</span><span class='s'>&quot;demo-inline&quot;</span><span class='nt'>&gt;</span>
+  You can blend in <span class='nt'>&lt;span</span> <span class='na'>class=</span><span class='s'>&quot;inline&quot;</span><span class='nt'>&gt;</span>editable areas<span class='nt'>&lt;/span&gt;</span> seamlessly
+  inside any content, including in <span class='nt'>&lt;a</span> <span class='na'>href=</span><span class='s'>&quot;http://smart.pr/&quot;</span><span class='nt'>&gt;</span>places where
+  <span class='nt'>&lt;span</span> <span class='na'>class=</span><span class='s'>&quot;inline&quot;</span><span class='nt'>&gt;</span>you might <span class='nt'>&lt;strong&gt;</span>not<span class='nt'>&lt;/strong&gt;</span> be expecting<span class='nt'>&lt;/span&gt;</span>
+  them<span class='nt'>&lt;/a&gt;</span>. <span class='nt'>&lt;em&gt;</span>Officially <span class='nt'>&lt;span</span> <span class='na'>class=</span><span class='s'>&quot;inline&quot;</span><span class='nt'>&gt;</span>amazing<span class='nt'>&lt;/span&gt;</span>, isn&#39;t it?!<span class='nt'>&lt;/em&gt;</span>
+  You can apply formatting as usual <span class='ni'>&amp;ndash;</span> try <span class='nt'>&lt;kbd&gt;</span>⌘B<span class='nt'>&lt;/kbd&gt;</span> for bold.
+<span class='nt'>&lt;/div&gt;</span>
+
+<span class='nt'>&lt;script&gt;</span>
+  <span class='nx'>jQuery</span><span class='p'>(</span><span class='kd'>function</span><span class='p'>(</span><span class='nx'>$</span><span class='p'>)</span> <span class='p'>{</span>
+    <span class='nx'>$</span><span class='p'>(</span><span class='s1'>&#39;#demo-inline .inline&#39;</span><span class='p'>).</span>
+      <span class='nx'>on</span><span class='p'>(</span><span class='s1'>&#39;click&#39;</span><span class='p'>,</span> <span class='kd'>function</span><span class='p'>(</span><span class='nx'>e</span><span class='p'>)</span> <span class='p'>{</span>
+        <span class='nx'>e</span><span class='p'>.</span><span class='nx'>preventDefault</span><span class='p'>();</span>
+      <span class='p'>}).</span>
+      <span class='nx'>htmleditable</span><span class='p'>(</span><span class='s1'>&#39;singleline&#39;</span><span class='p'>,</span> <span class='p'>[</span><span class='s1'>&#39;bold&#39;</span><span class='p'>]);</span>
+  <span class='p'>});</span>
+<span class='nt'>&lt;/script&gt;</span>
+</code></pre>
+</div>
+
+
+</details>
 </article>
+
 <script>
 	
 	jQuery(function($) {
@@ -126,16 +413,24 @@
 
 		// Make the live preview always be within the viewport.
 
-		// TODO: max-height for both $content and $sticky.
-
 		var $content = $('#preview > .content'),
-			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight(),
-			$sticky = $content.clone().css({
-				position: 'fixed',
-				top: spacing,
-				left: $content.offset().left,
-				width: $content.width()
-			}).hide().insertAfter($content);
+			$sticky = $content.clone(),
+			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight();
+		
+		// TODO: Shrink for footer -- would probably be best to work with
+		// section bottom instead of footer top.
+		var height = $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height());
+		$content.css({
+			'max-height': height
+		});
+		var height = $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height());
+		$sticky.css({
+			position: 'fixed',
+			top: spacing,
+			left: $content.offset().left,
+			width: $content.width(),
+			'max-height': height
+		}).hide().insertAfter($content);
 		
 		$(window).
 			on('scroll', function() {
@@ -144,13 +439,22 @@
 					$sticky[isStickyNeeded ? 'show' : 'hide']();
 					$content.css('visibility', isStickyNeeded ? 'hidden' : '');
 				}
+				// TODO: Only do this when `$content` is visible.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
 			}).
 			on('resize', function() {
 				// Is being called when zooming as well.
 				// TODO: That is, in Chrome. Other browsers?
+				// TODO: Only update what's visible and if height has changed.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
 				$sticky.css({
 					left: $content.offset().left,
-					width: $content.width()
+					width: $content.width(),
+					'max-height': $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height())
 				});
 			});
 	
@@ -173,5 +477,6 @@
 			});
 
 		</script>
+
 	</body>
 </html>

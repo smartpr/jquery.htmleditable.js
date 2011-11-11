@@ -27,12 +27,18 @@ jQuery.fn.htmleditable = $.pluginify
 
 		return @ if $(@).closest(':htmleditable').length > 0 or $(@).parents('[contenteditable="true"]').length > 0
 		
+		if arguments.length < 2 and $.isArray linemode
+			features = linemode
+			linemode = undefined
+		
+		linemode = 'native' unless linemode?
+		# TODO: Filter out duplicates.
+		features = $.merge [linemode, 'base'], features ? []
+
 		# TODO: Is this [really necessary](http://code.google.com/p/rangy/wiki/
 		# RangyObject#rangy.init())?
 		rangy.init()
 
-		# TODO: Filter out duplicates.
-		features = $.merge [linemode, 'base'], features ? []
 		load = $.merge [], features
 		for feature in features
 			for condition in jQuery.htmleditable[feature]?.condition ? []
@@ -131,13 +137,15 @@ jQuery.fn.htmleditable = $.pluginify
 
 		# Feature-specific initialization.
 		for name, feature of $(@).data('htmleditable').features
-			feature.init?.call $(@)
-			for keys, args of feature.hotkeys
-				# `jquery.hotkeys.js` does not seem to support `$.fn.on` (yet?)
-				$(@).bind 'keydown', keys, (e) ->
-					e.preventDefault()
-					e.stopPropagation()
-					$(@).htmleditable 'command', name, args...
+			do (name, feature) =>
+				feature.init?.call $(@)
+				for keys, args of feature.hotkeys
+					# `jquery.hotkeys.js` does not seem to support `$.fn.on`
+					# (yet?)
+					$(@).bind 'keydown', keys, (e) ->
+						e.preventDefault()
+						e.stopPropagation()
+						$(@).htmleditable 'command', name, args...
 		
 		@
 	

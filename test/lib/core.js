@@ -9,18 +9,56 @@
   });
   describe("$.fn.htmleditable()", function() {
     describe("init", function() {
-      it("explicitly", function() {
-        expect($elem.htmleditable('init').get()).toEqual($elem.get());
+      it("takes line mode and features", function() {
+        expect($elem.htmleditable('init', 'linebreaks', ['bold']).get()).toEqual($elem.get());
         return expect($elem).toBe(':htmleditable');
       });
-      it("implicitly", function() {
-        expect($elem.htmleditable().get()).toEqual($elem.get());
-        return expect($elem).toBe(':htmleditable');
+      it("makes features an optional argument", function() {
+        var key;
+        $elem.htmleditable('init', 'linebreaks');
+        return expect((function() {
+          var _results;
+          _results = [];
+          for (key in $elem.data('htmleditable').features) {
+            _results.push(key);
+          }
+          return _results;
+        })()).toEqual(['linebreaks', 'base']);
       });
-      return xit("cancels features that are invalidated by later features", function() {
+      it("makes line mode an optional argument", function() {
+        var key;
+        $elem.htmleditable('init', ['bold']);
+        return expect((function() {
+          var _results;
+          _results = [];
+          for (key in $elem.data('htmleditable').features) {
+            _results.push(key);
+          }
+          return _results;
+        })()).toEqual(['native', 'base', 'bold']);
+      });
+      it("can be invoked implicitly (although not recommended if first argument is a string)", function() {
+        return expect($elem.htmleditable()).toBe(':htmleditable');
+      });
+      xit("cancels features that are invalidated by later features", function() {
         spyOn($.htmleditable.multiline, 'init');
         $elem.htmleditable(['singleline']);
         return expect($.htmleditable.multiline.init).not.toHaveBeenCalled();
+      });
+      return it("registers hotkeys", function() {
+        spyOn($.htmleditable.bold, 'command');
+        spyOn($.htmleditable.list, 'command');
+        $elem.htmleditable(['bold', 'list']).trigger({
+          type: 'keydown',
+          target: $elem[0],
+          which: 66,
+          altKey: false,
+          ctrlKey: false,
+          metaKey: true,
+          shiftKey: false
+        });
+        expect($.htmleditable.bold.command).toHaveBeenCalled();
+        return expect($.htmleditable.list.command).not.toHaveBeenCalled();
       });
     });
     describe("value", function() {
