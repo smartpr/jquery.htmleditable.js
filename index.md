@@ -40,4 +40,5 @@ We aim for support of the following browsers:
 *	latest version of Chrome;
 *	latest version of Safari;
 *	latest version of Firefox;
-*	Internet Explorer 8 and later.
+*	Internet Explorer 8 and up;
+*   Mobile Safari 5.1 (iOS 5) and up.

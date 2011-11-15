@@ -1,28 +1,46 @@
 <style>
-  /* TODO: Is this an issue with Gecko, or with Firefox? */
-  html.gecko.mac #demo-area {
-    outline: none;
-  }
-  /* TODO: Feature detect `appearance`, if feasible. */
-  html.msie #demo-area {
-    border: 1px solid #7f9db9;
-  }
   #demo-area {
-    /* Each of the following properties has a different set of allowed values,
+    /* Each of the appearance properties has a different set of allowed values,
        as defined by the corresponding specifications. */
-    -moz-appearance: textfield-multiline;
-    -webkit-appearance: textarea;
     appearance: field;
+    /* `-ms-appearance` or `-o-appearance` don't exist as far as I can tell. */
+    -webkit-appearance: textarea;
+    -moz-appearance: textfield-multiline;
     /* Enable scrollbars when necessary. */
     overflow-x: auto;
     overflow-y: auto;
     /* Like `textarea`'s default behavior, make it resizable in both
-       dimensions (if supported by the browser). */
+       dimensions (in browsers that support it). */
     resize: both;
     /* Give it some initial size below which it will not be resizable. */
     width: 20em;
     height: 5em;
     padding: .5em;
+  }
+  /* Browsers that do not support `appearance` need some hardcoded styling to
+     make the htmleditable look like an editable element. */
+  html.no-appearance #demo-area {
+    border: 1px solid;
+  }
+  /* On Windows the default styling of a textarea tends to be a blue'ish
+     border. */
+  html.no-appearance.win #demo-area {
+    border-color: #7f9db9;
+  }
+  /* Mobile Safari will tell you that it supports `appearance`. In practice
+     though it seems to honor it only if a border is specified, and even then
+     only partially because it won't apply rounded corners. (Uhm yeah that's
+     crazy.) */
+  html.webkit.ios #demo-area {
+    border: 1px solid;
+    -webkit-border-radius: 5px;
+  }
+  /* Firefox on Mac has some ugly quirk in which it displays two types of
+     outline at the same time; a Windows-style thin dotted line and a Mac-style
+     blue blurred line. By disabling outlining we lose the dotted line and keep
+     the blue one. */
+  html.firefox.mac #demo-area {
+    outline-style: none;
   }
 </style>
 

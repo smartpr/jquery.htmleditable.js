@@ -2,6 +2,16 @@
 layout: base
 ---
 
+<script>
+	Modernizr.
+		addTest('appearance', Modernizr.testAllProps('appearance')).
+		addTest('mac', /Mac/.test(navigator.platform)).
+		addTest('ios', /CPU (?:i\S+\s)?OS/.test(navigator.userAgent)).
+		addTest('win', /Win/.test(navigator.platform)).
+		addTest('webkit', /WebKit/.test(navigator.userAgent)).
+		addTest('firefox', /Firefox/.test(navigator.userAgent));
+</script>
+
 <script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-core.js"></script>
 <script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-selectionsaverestore.js"></script>
 <script type="text/javascript" src="{{ site.repository }}/raw/{{ site.version }}/lib/jquery.pluginify.js"></script>

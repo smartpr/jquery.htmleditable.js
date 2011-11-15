@@ -1,13 +1,8 @@
-/* line 4, site.scss */
-html.gecko [contenteditable="true"] {
-  outline: 0;
-}
-
-/* line 11, site.scss */
+/* line 7, site.scss */
 #preview > h3 {
   margin-top: 0;
 }
-/* line 14, site.scss */
+/* line 10, site.scss */
 #preview > .content {
   padding: .5em;
   background-color: LemonChiffon;

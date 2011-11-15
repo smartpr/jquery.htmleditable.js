@@ -1,10 +1,6 @@
 @import "compass/css3";
 @import "compass/reset/utilities";
 
-html.gecko [contenteditable="true"] {
-	@include reset-focus;
-}
-
 // DEMO
 
 #preview {

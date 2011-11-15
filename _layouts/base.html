@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js">
 	<head>
 		<!--
 		IE8 runs 'intranet sites' in compatibility mode by default, which we
@@ -10,28 +10,8 @@
 
 		<title>jquery.htmleditable.js</title>
 
-		<!--
-		We need jQuery at this stage because `jquery.browser.min.js` depends on
-		it.
-		-->
-		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.js"></script>
-		<!--
-		Load these environment checkers before any style sheets because styling
-		may be based on classes that are set by the checkers. If we would load
-		the checkers at a later stage everything would still work in the sense
-		that the page ends up in the same state, but it may not be desirable.
-		For example; imagine that we want to block a part of the interface in
-		case the environment does not meet certain criteria. In scenarios like
-		that we would like to have a guarantee that this piece of interface is
-		*never* displayed, not even briefly.
-		-->
-		<script type="text/javascript" src="{{ site.projects_url }}{{ site.project_path }}/assets/jquery.browser.min.js"></script>
-		<script type="text/javascript" src="{{ site.projects_url }}{{ site.project_path }}/assets/modernizr.js"></script>
-		<!--
-		TODO: Styling before any content, yet it looks like Firefox is building
-		the document before the styling has been applied. The result is a flash
-		of unstyled content. Hmm, how can we prevent this?
-		-->
+		<script src="{{ site.projects_url }}{{ site.project_path }}/assets/modernizr.js"></script>
+
 		<link class="theme" rel="stylesheet" type="text/css" href="{{ site.projects_url }}/project-site.themes/smartpr-oss.css" />
 		<link rel="stylesheet" type="text/css" href="{{ site.projects_url }}{{ site.project_path }}/assets/site.css" />
 	</head>
@@ -51,6 +31,7 @@
 		</nav>
 
 		<section>
+			<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.js"></script>
 			{{ content }}
 		</section>
 
