@@ -11,7 +11,7 @@ fi
 
 case $1 in
 dev)
-	jekyll --auto --pygments --safe --url http://dev/jquery.htmleditable.js/_site &
+	jekyll --auto --pygments --safe --url http://dev/jquery.htmleditable.js/gh-pages/_site &
 	echo $! >> $PIDS_FILE
 	compass watch --poll --environment development &
 	echo $! >> $PIDS_FILE
