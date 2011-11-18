@@ -1,5 +1,5 @@
 ---
-layout: sponsored
+layout: article
 ---
 
 Let's face it; [contenteditable](http://dev.w3.org/html5/spec/Overview.html#
@@ -31,6 +31,7 @@ but none of them is like htmleditable, for various reasons:
 	explicitly allowed.
 *   Capable of dealing with copy-paste from even the most hellacious of
 	hellacious sources (yes I'm looking at you Microsoft Word).
+*	Highly sophisticated yet unpretentious.
 *	Configurable and extensible.
 
 ### Browser support

@@ -2,6 +2,6 @@
 *.tmproj
 *.swp
 *.orig
-.dev.pids
 .sass-cache/
 _site/
+.manage.pids

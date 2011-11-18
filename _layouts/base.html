@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html class="no-js">
 	<head>
-		<!--
-		IE8 runs 'intranet sites' in compatibility mode by default, which we
-		do not want as we are not aiming at IE7 support.
-		-->
+		<!-- IE8 runs 'intranet sites' in compatibility mode by default, which
+		     we do not want as we are not aiming at IE7 support -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 		<title>jquery.htmleditable.js</title>
 
-		<script src="{{ site.projects_url }}{{ site.project_path }}/assets/modernizr.js"></script>
+		<!-- Absolute paths everywhere so we can use this base for pages in
+		     subdirectories as well -->
+		<script src="{{ site.url }}/assets/modernizr.js"></script>
 
-		<link class="theme" rel="stylesheet" type="text/css" href="{{ site.projects_url }}/project-site.themes/smartpr-oss.css" />
-		<link rel="stylesheet" type="text/css" href="{{ site.projects_url }}{{ site.project_path }}/assets/site.css" />
+		<link class="theme" rel="stylesheet" href="{{ site.theme }}" />
+		<link rel="stylesheet" href="{{ site.url }}/assets/site.css" />
 	</head>
 	<body>
 		<header>
 			<h1>jquery.htmleditable.js <span class="version">v{{ site.version }}</span></h1>
 			<h2>contenteditable’s missing API</h2>
+			<aside class="sponsor">
+				<p>
+					Sponsored by &amp; used in production at
+					<a href="http://smart.pr/" title="A tool to spread your news">Smart.pr</a>
+				</p>
+			</aside>
 		</header>
 		
 		<nav>
-			<a href="{{ site.projects_url }}{{ site.project_path }}/index.html"{% if page.url == '/index.html' %} class="selected"{% endif %}>overview</a>
-			<a href="{{ site.projects_url }}{{ site.project_path }}/demo.html"{% if page.url == '/demo.html' %} class="selected"{% endif %}>demo</a>
+			<a href="{{ site.url }}/index.html"{% if page.url == '/index.html' %} class="selected"{% endif %}>overview</a>
+			<a href="{{ site.url }}/demo.html"{% if page.url == '/demo.html' %} class="selected"{% endif %}>demo</a>
 			<a href="{{ site.repository }}/raw/{{ site.version }}/jquery.htmleditable.standalone.min.js">download</a>
-			<a href="{{ site.projects_url }}{{ site.project_path }}/doc/index.html">documentation</a>
-			<a href="{{ site.projects_url }}{{ site.project_path }}/test.html">tests</a>
+			<a href="{{ site.url }}/doc/index.html">documentation</a>
+			<a href="{{ site.url }}/test.html">tests</a>
 			<a href="{{ site.repository }}">development</a>
 		</nav>
 
 		<section>
-			<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.js"></script>
+			<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
 			{{ content }}
 		</section>
 
@@ -42,20 +48,19 @@
 			</p>
 			<button class="no-theme">Disable Theme</button>
 		</footer>
-		<script type="text/javascript">
+		<script>
 			
 			$('footer .no-theme').on('click', function() {
-				$('[type="text/css"].theme').add(this).remove();
+				$('style.theme, link[rel~="stylesheet"].theme').add(this).remove();
 			});
 
 		</script>
 
-		<script type="text/javascript">
+		<script>
 			var clicky_site_ids = clicky_site_ids || [];
 			clicky_site_ids.push(66488240);
 			(function() {
 				var s = document.createElement('script');
-				s.type = 'text/javascript';
 				s.async = true;
 				s.src = '//static.getclicky.com/js';
 				document.getElementsByTagName('head')[0].appendChild(s);
