@@ -3433,7 +3433,7 @@ rangy.createModule("SaveRestore", function(api, module) {
 	});
 
 })( jQuery );/**
-This is I-Don't-Have-A-Fuckin-Clue-ware
+http://timmolendijk.mit-license.org/
 */
 
 (function() {
