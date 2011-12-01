@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+
+# We are not using a `Cakefile` because asynchronicity is a pain in build
+# systems. And because it means having to deal with annoying issues such as
+# node.js executing Compass [being](https://github.com/joyent/node/issues/2127)
+# [problematic](https://github.com/chriseppstein/compass/issues/619). Ergo; not
+# the right tool for the job.
+
+# Keep track of pids of launched processes so we can keep the house clean.
+PIDS_FILE=`dirname $0`/.manage.pids
+
+# Kill all processes that were spawned the last time this script executed.
+if [ -f $PIDS_FILE ]; then
+	kill -KILL `cat $PIDS_FILE`
+	rm $PIDS_FILE
+fi
+
+case $1 in
+dev)
+	# Note that watching file changes is currently [broken in many scenarios]
+	# (https://github.com/joyent/node/issues/1986#issuecomment-2892299).
+	coffee --output lib/ --compile --watch src/ &
+	echo $! >> $PIDS_FILE
+	coffee --output test/lib/ --compile --watch test/src/ &
+	echo $! >> $PIDS_FILE
+	;;
+release)
+	coffee --output lib/ --compile src/
+	coffee --output test/lib/ --compile test/src/
+	cat `cat htmleditable.build` > jquery.htmleditable.js
+	cat `cat dependencies.build` jquery.htmleditable.js > jquery.htmleditable.standalone.js
+	uglifyjs --output jquery.htmleditable.min.js jquery.htmleditable.js
+	uglifyjs --output jquery.htmleditable.standalone.min.js --no-copyright jquery.htmleditable.standalone.js
+	git commit --all -m "Built for release"
+	git push origin master
+	;;
+*)
+	echo "Usage: manage [command]"
+	echo ""
+	echo "Commands:"
+	echo "  dev       Compile CoffeeScript continuously"
+	echo "  release   Build, commit, tag and push"
+	echo "  *         Kill any running processes and display this description"
+	echo ""
+	echo "Dependencies: coffee, uglifyjs, git"
+	;;
+esac

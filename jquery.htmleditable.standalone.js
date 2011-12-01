@@ -3432,22 +3432,29 @@ rangy.createModule("SaveRestore", function(api, module) {
 		jQuery.event.special[ this ] = { add: keyHandler };
 	});
 
-})( jQuery );(function() {
+})( jQuery );/**
+This is I-Don't-Have-A-Fuckin-Clue-ware
+*/
+
+(function() {
+
   'use strict';
-  var $, $rinsebin, cleanTree, getRinsebin, _ref;
-  var __slice = Array.prototype.slice, __indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, l = this.length; i < l; i++) {
-      if (this[i] === item) return i;
-    }
-    return -1;
-  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  var $, $rinsebin, cleanTree, getRinsebin, _ref,
+    __slice = Array.prototype.slice,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (__hasProp.call(this, i) && this[i] === item) return i; } return -1; };
+
   $ = jQuery.sub();
+
   jQuery.expr[':'].htmleditable = function(el) {
     var $el;
     $el = $(el);
     return $el.is('[contenteditable="true"]') && ($el.data('htmleditable') != null);
   };
+
   $.fn.originalHtml = $.fn.html;
+
   jQuery.fn.html = function() {
     var _ref;
     if (this.eq(0).is(':htmleditable')) {
@@ -3455,17 +3462,24 @@ rangy.createModule("SaveRestore", function(api, module) {
     }
     return (_ref = $(this)).originalHtml.apply(_ref, arguments);
   };
+
   jQuery.fn.htmleditable = $.pluginify({
     init: function(linemode, features) {
-      var args, condition, feature, i, keys, l, load, name, shouldBeIncluded, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+      var condition, feature, i, l, load, name, shouldBeIncluded, _fn, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4,
+        _this = this;
       if (!jQuery.isReady) {
         $.error("Initialization of htmleditable is not possible before the document is ready. Have you placed your code in a 'ready' handler?");
       }
       if ($(this).closest(':htmleditable').length > 0 || $(this).parents('[contenteditable="true"]').length > 0) {
         return this;
       }
-      rangy.init();
+      if (arguments.length < 2 && $.isArray(linemode)) {
+        features = linemode;
+        linemode = void 0;
+      }
+      if (linemode == null) linemode = 'native';
       features = $.merge([linemode, 'base'], features != null ? features : []);
+      rangy.init();
       load = $.merge([], features);
       for (_i = 0, _len = features.length; _i < _len; _i++) {
         feature = features[_i];
@@ -3481,9 +3495,7 @@ rangy.createModule("SaveRestore", function(api, module) {
           if (__indexOf.call(load, condition) >= 0 !== shouldBeIncluded) {
             while (true) {
               i = $.inArray(feature, load);
-              if (i === -1) {
-                break;
-              }
+              if (i === -1) break;
               load.splice(i, 1);
             }
             break;
@@ -3498,20 +3510,19 @@ rangy.createModule("SaveRestore", function(api, module) {
       $(this).data('htmleditable', {
         features: features
       }).attr('contenteditable', true).bind('paste', function(e) {
-        var selection;
+        var selection,
+          _this = this;
         selection = rangy.saveSelection();
         getRinsebin().focus();
         try {
-          if (document.execCommand('Paste') !== false) {
-            e.preventDefault();
-          }
+          if (document.execCommand('Paste') !== false) e.preventDefault();
         } catch (err) {
 
         }
-        return setTimeout(__bind(function() {
+        return setTimeout(function() {
           var cleaned, html;
-          $(this).focus();
-          cleaned = cleanTree.call($(this), getRinsebin()[0]);
+          $(_this).focus();
+          cleaned = cleanTree.call($(_this), getRinsebin()[0]);
           getRinsebin().empty().append(cleaned);
           html = getRinsebin().html();
           getRinsebin().empty();
@@ -3521,15 +3532,16 @@ rangy.createModule("SaveRestore", function(api, module) {
           } catch (err) {
             return document.selection.createRange().pasteHTML(html);
           }
-        }, this));
+        });
       }).bind('input', function() {
         return $(this).updateValue();
       }).bind('change mouseup touchend focus blur', function() {
         return $(this).updateState();
       }).bind('keydown', function() {
-        return setTimeout(__bind(function() {
-          return $(this).updateState();
-        }, this));
+        var _this = this;
+        return setTimeout(function() {
+          return $(_this).updateState();
+        });
       });
       try {
         document.execCommand('styleWithCSS', void 0, false);
@@ -3539,41 +3551,44 @@ rangy.createModule("SaveRestore", function(api, module) {
       $(this).updateState();
       $(this).htmleditable('value', $(this).originalHtml());
       _ref4 = $(this).data('htmleditable').features;
-      for (name in _ref4) {
-        feature = _ref4[name];
-        if ((_ref5 = feature.init) != null) {
-          _ref5.call($(this));
-        }
+      _fn = function(name, feature) {
+        var args, keys, _ref5, _ref6, _results;
+        if ((_ref5 = feature.init) != null) _ref5.call($(_this));
         _ref6 = feature.hotkeys;
+        _results = [];
         for (keys in _ref6) {
           args = _ref6[keys];
-          $(this).bind('keydown', keys, function(e) {
+          _results.push($(_this).bind('keydown', keys, function(e) {
             var _ref7;
             e.preventDefault();
             e.stopPropagation();
             return (_ref7 = $(this)).htmleditable.apply(_ref7, ['command', name].concat(__slice.call(args)));
-          });
+          }));
         }
+        return _results;
+      };
+      for (name in _ref4) {
+        feature = _ref4[name];
+        _fn(name, feature);
       }
       return this;
     },
     value: function(html) {
-      var cleaned, result;
-      if (html == null) {
-        return $(this).data('htmleditable').value;
-      }
-      html = html.replace(/^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, __bind(function(match, before, settings, after) {
+      var cleaned, result,
+        _this = this;
+      if (html == null) return $(this).data('htmleditable').value;
+      html = html.replace(/^([\s\S]*)<!--htmleditable:state\s([\s\S]*?)-->([\s\S]*)$/g, function(match, before, settings, after) {
         var features, name, value, _ref, _ref2;
-        features = $(this).data('htmleditable').features;
+        features = $(_this).data('htmleditable').features;
         _ref = $.parseJSON("{ " + settings + " }");
         for (name in _ref) {
           value = _ref[name];
           if (((_ref2 = features[name]) != null ? _ref2.content : void 0) === true) {
-            $(this).htmleditable('command', name, value);
+            $(_this).htmleditable('command', name, value);
           }
         }
         return before + after;
-      }, this));
+      });
       getRinsebin().html(html);
       cleaned = cleanTree.call($(this), getRinsebin()[0]);
       getRinsebin().empty();
@@ -3584,12 +3599,8 @@ rangy.createModule("SaveRestore", function(api, module) {
     state: function(features) {
       var feature, requested, state, _i, _len, _ref;
       state = (_ref = $(this).data('htmleditable')) != null ? _ref.state : void 0;
-      if (state == null) {
-        return state;
-      }
-      if (typeof features === 'string') {
-        return state[features];
-      }
+      if (state == null) return state;
+      if (typeof features === 'string') return state[features];
       if (!(features != null ? features.length : void 0)) {
         return $.extend({}, state);
       }
@@ -3627,22 +3638,18 @@ rangy.createModule("SaveRestore", function(api, module) {
         return this;
       }
       selection = rangy.getSelection();
-      if (selection.rangeCount !== 1) {
-        return;
-      }
+      if (selection.rangeCount !== 1) return;
       range = selection.getRangeAt(0);
       scope = rangy.createRange();
       scope.selectNodeContents(this);
       intersection = scope.intersection(range);
-      if (intersection === null || !intersection.equals(range)) {
-        return;
-      }
+      if (intersection === null || !intersection.equals(range)) return;
       return range;
     }
   });
-  if ((_ref = jQuery.htmleditable) == null) {
-    jQuery.htmleditable = {};
-  }
+
+  if ((_ref = jQuery.htmleditable) == null) jQuery.htmleditable = {};
+
   cleanTree = function(root) {
     var features, layer;
     features = this.data('htmleditable').features;
@@ -3655,9 +3662,7 @@ rangy.createModule("SaveRestore", function(api, module) {
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           child = _ref2[_i];
           include = layer.call(this, child);
-          if (include != null) {
-            children.appendChild(include);
-          }
+          if (include != null) children.appendChild(include);
         }
         processors = (function() {
           var _results;
@@ -3680,9 +3685,7 @@ rangy.createModule("SaveRestore", function(api, module) {
           }
         }
         if (element != null) {
-          if (children.hasChildNodes()) {
-            element.appendChild(children);
-          }
+          if (children.hasChildNodes()) element.appendChild(children);
           children = element;
         }
         return children;
@@ -3692,24 +3695,21 @@ rangy.createModule("SaveRestore", function(api, module) {
     };
     return layer.call(this, root);
   };
+
   $.fn.updateValue = function() {
     var $current, current, data, feature, name, settings, _ref2, _ref3, _ref4, _ref5;
     data = this.data('htmleditable');
     _ref2 = data.features;
     for (name in _ref2) {
       feature = _ref2[name];
-      if ((_ref3 = feature.change) != null) {
-        _ref3.call(this);
-      }
+      if ((_ref3 = feature.change) != null) _ref3.call(this);
     }
     $current = this.clone(false, false);
     settings = {};
     _ref4 = data.features;
     for (name in _ref4) {
       feature = _ref4[name];
-      if ((_ref5 = feature.output) != null) {
-        _ref5.call(this, $current);
-      }
+      if ((_ref5 = feature.output) != null) _ref5.call(this, $current);
       if (feature.content === true) {
         settings[name] = this.htmleditable('state', name);
       }
@@ -3717,13 +3717,14 @@ rangy.createModule("SaveRestore", function(api, module) {
     current = $current.html();
     if (!$.isEmptyObject(settings)) {
       settings = JSON.stringify(settings);
-      current = "<!--htmleditable:state " + settings.slice(1, settings.length - 1) + " -->" + current;
+      current = "<!--htmleditable:state " + settings.slice(1, (settings.length - 1)) + " -->" + current;
     }
     if (data.value !== current) {
       data.value = current;
       return this.change();
     }
   };
+
   $.fn.updateState = function(state) {
     var data, delta, feature, featureState, featuresState, key, name, selection, value, _ref2, _ref3, _ref4;
     selection = this.htmleditable('selection');
@@ -3742,9 +3743,7 @@ rangy.createModule("SaveRestore", function(api, module) {
     }
     $.extend(featuresState, state);
     data = this.data('htmleditable');
-    if ((_ref4 = data.state) == null) {
-      data.state = {};
-    }
+    if ((_ref4 = data.state) == null) data.state = {};
     delta = {};
     for (key in featuresState) {
       value = featuresState[key];
@@ -3753,17 +3752,18 @@ rangy.createModule("SaveRestore", function(api, module) {
         delta[key] = value;
       }
     }
-    if (!$.isEmptyObject(delta)) {
-      return this.trigger('state', delta);
-    }
+    if (!$.isEmptyObject(delta)) return this.trigger('state', delta);
   };
+
   $rinsebin = $();
+
   getRinsebin = function() {
     if ($rinsebin.length !== 1) {
       $rinsebin = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;" />').prependTo('body');
     }
     return $rinsebin;
   };
+
   jQuery.fn.domSplice = function(element) {
     var elements;
     elements = [];
@@ -3788,74 +3788,43 @@ rangy.createModule("SaveRestore", function(api, module) {
     });
     return $(elements);
   };
-}).call(this);
-(function() {
-  /**
-  
-  Is defined in `$.htmleditable.base` and does some generic cleaning. Is enabled
-  by default. You usually wouldn't have to deal with this one.
-  
-  */
-  var $;
-  $ = jQuery;
-  $.htmleditable.base = {
-    input: function(html) {
-      return html.replace(/Version:[\d.]+\nStartHTML:\d+\nEndHTML:\d+\nStartFragment:\d+\nEndFragment:\d+/gi, '');
-    }
-  };
+
 }).call(this);
 (function() {
   var $;
+
   $ = jQuery;
+
   $.htmleditable["native"] = {
     element: function(element) {
       var _ref;
-      if (element != null) {
-        return;
-      }
-      if (this.is('p, div, br') && ((_ref = this.prop('scopeName')) === void 0 || _ref === 'HTML')) {
+      if (element != null) return;
+      if (this.is('p, div, br') && ((_ref = this.prop('scopeName')) === (void 0) || _ref === 'HTML')) {
         return document.createElement(this[0].nodeName);
       }
       if (this.is(':header')) {
         return function(element) {
-          if (element != null) {
-            return;
-          }
+          if (element != null) return;
           return document.createElement('p');
         };
       }
     }
   };
+
 }).call(this);
 (function() {
   var $;
+
   $ = jQuery;
-  $.htmleditable.singleline = {
-    condition: ['-multiline'],
-    init: function() {
-      return this.bind('keydown', 'return', function(e) {
-        return e.preventDefault();
-      });
-    }
-  };
-}).call(this);
-(function() {
-  var $;
-  $ = jQuery;
+
   $.htmleditable.linebreaks = {
     element: function(element) {
       var _ref, _ref2, _ref3;
-      if (this.length === 0 || (element != null)) {
-        return;
-      }
-      if (this.is('br')) {
-        return document.createElement('br');
-      }
-      if (this.is('p, :header') && ((_ref = (_ref2 = this.prop('prefix')) != null ? _ref2 : this.prop('scopeName')) === void 0 || _ref === null || _ref === 'HTML')) {
+      if (this.length === 0 || (element != null)) return;
+      if (this.is('br')) return document.createElement('br');
+      if (this.is('p, :header') && ((_ref = (_ref2 = this.prop('prefix')) != null ? _ref2 : this.prop('scopeName')) === (void 0) || _ref === null || _ref === 'HTML')) {
         return function(element, children) {
-          if (element != null) {
-            return;
-          }
+          if (element != null) return;
           children.appendChild(document.createElement('br'));
           children.appendChild(document.createElement('br'));
         };
@@ -3863,9 +3832,7 @@ rangy.createModule("SaveRestore", function(api, module) {
       if ((_ref3 = this.css('display')) === 'block' || _ref3 === 'list-item' || _ref3 === 'table-row') {
         return function(element, children) {
           var last;
-          if (element != null) {
-            return;
-          }
+          if (element != null) return;
           last = children.lastChild;
           while ((last != null) && last.nodeType === 3 && /^\s*$/.test(last.data)) {
             last = last.previousSibling;
@@ -3886,9 +3853,7 @@ rangy.createModule("SaveRestore", function(api, module) {
         $(this).find('div').each(function() {
           var prev;
           prev = $(this)[0].previousSibling;
-          if ((prev != null) && !$(prev).is('br')) {
-            $(this).before('<br>');
-          }
+          if ((prev != null) && !$(prev).is('br')) $(this).before('<br>');
           return $(this).domSplice();
         });
         $(this).find('p').each(function() {
@@ -3902,16 +3867,52 @@ rangy.createModule("SaveRestore", function(api, module) {
       }
     }
   };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.singleline = {
+    condition: ['-multiline'],
+    init: function() {
+      return this.bind('keydown', 'return', function(e) {
+        return e.preventDefault();
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
+  /**
+  
+  Is defined in `$.htmleditable.base` and does some generic cleaning. Is enabled
+  by default. You usually wouldn't have to deal with this one.
+  */
+
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.base = {
+    input: function(html) {
+      return html.replace(/Version:[\d.]+\nStartHTML:\d+\nEndHTML:\d+\nStartFragment:\d+\nEndFragment:\d+/gi, '');
+    }
+  };
+
 }).call(this);
 (function() {
   var $, name, tag;
+
   $ = jQuery;
+
   name = void 0;
+
   tag = function() {
     var $testbed, range;
-    if (name != null) {
-      return name;
-    }
+    if (name != null) return name;
     $testbed = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo('body');
     range = rangy.createRange();
     range.selectNodeContents($testbed[0]);
@@ -3921,28 +3922,21 @@ rangy.createModule("SaveRestore", function(api, module) {
     $testbed.remove();
     return name != null ? name : 'b';
   };
+
   $.htmleditable.bold = {
     element: function(element, children) {
-      if (this.length === 0 || (element != null)) {
-        return;
-      }
-      if (this.is('strong, b')) {
-        return document.createElement(tag());
-      }
+      if (this.length === 0 || (element != null)) return;
+      if (this.is('strong, b')) return document.createElement(tag());
       if (this.is(':header') && $(children.childNodes).filter(tag()).length === 0) {
         return function(element, children) {
           var bold, child, next;
-          if ($(element).is(':header')) {
-            return;
-          }
+          if ($(element).is(':header')) return;
           bold = document.createElement(tag());
           child = children.lastChild;
           while (child != null) {
             next = child.previousSibling;
             if (bold.hasChildNodes() || !$(child).is('br') && (child.nodeType !== 3 || !/^\s*$/.test(child.data))) {
-              if (!bold.hasChildNodes()) {
-                children.insertBefore(bold, child);
-              }
+              if (!bold.hasChildNodes()) children.insertBefore(bold, child);
               bold.insertBefore(child, bold.firstChild);
             }
             child = next;
@@ -3954,9 +3948,7 @@ rangy.createModule("SaveRestore", function(api, module) {
       return $tree.find(tag()).domSplice('<strong />');
     },
     state: function() {
-      if ($(this).htmleditable('selection') == null) {
-        return null;
-      }
+      if ($(this).htmleditable('selection') == null) return null;
       return document.queryCommandState('bold');
     },
     hotkeys: {
@@ -3966,16 +3958,17 @@ rangy.createModule("SaveRestore", function(api, module) {
       return document.execCommand('bold', null, null);
     }
   };
+
 }).call(this);
 (function() {
   var $;
+
   $ = jQuery;
+
   $.htmleditable.link = {
     element: function(element) {
       var link;
-      if (this.length === 0 || (element != null)) {
-        return;
-      }
+      if (this.length === 0 || (element != null)) return;
       if (this.is('a[href^="http://"]')) {
         link = document.createElement('a');
         link.setAttribute('href', this.attr('href'));
@@ -3986,20 +3979,14 @@ rangy.createModule("SaveRestore", function(api, module) {
     state: function() {
       var selection;
       selection = $(this).htmleditable('selection');
-      if (selection == null) {
-        return null;
-      }
+      if (selection == null) return null;
       return $(selection.collapsed ? selection.commonAncestorContainer : selection.getNodes()).closest('a').get();
     },
     command: function(url) {
       var selection;
       selection = $(this).htmleditable('selection');
-      if (selection == null) {
-        return;
-      }
-      if (url == null) {
-        url = 'http://';
-      }
+      if (selection == null) return;
+      if (url == null) url = 'http://';
       if (!selection.collapsed) {
         return document.execCommand('createLink', null, url);
       } else {
@@ -4011,10 +3998,13 @@ rangy.createModule("SaveRestore", function(api, module) {
       }
     }
   };
+
 }).call(this);
 (function() {
   var $;
+
   $ = jQuery;
+
   $.htmleditable.list = {
     element: function(element, children) {
       var $child, child, list, name, next, _i, _len, _ref, _ref2, _ref3;
@@ -4025,9 +4015,7 @@ rangy.createModule("SaveRestore", function(api, module) {
           $child = $(child);
           next = child.nextSibling;
           if ($child.is('li')) {
-            if (!list.hasChildNodes()) {
-              children.insertBefore(list, child);
-            }
+            if (!list.hasChildNodes()) children.insertBefore(list, child);
             list.appendChild(child);
             $child.html($child.html().replace(/^\S\.?(?:&nbsp;)+([\s\S]+)$/, "$1"));
           } else if (list.hasChildNodes()) {
@@ -4040,9 +4028,7 @@ rangy.createModule("SaveRestore", function(api, module) {
           child = next;
         }
       }
-      if (this.length === 0) {
-        return;
-      }
+      if (this.length === 0) return;
       _ref3 = (_ref = (_ref2 = this.attr('class')) != null ? _ref2.split(' ') : void 0) != null ? _ref : [];
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
         name = _ref3[_i];
@@ -4050,24 +4036,22 @@ rangy.createModule("SaveRestore", function(api, module) {
           return document.createElement('li');
         }
       }
-      if (element != null) {
-        return;
-      }
+      if (element != null) return;
       if (this.is('ul, ol, li')) {
         return document.createElement(this.prop('nodeName'));
       }
     },
     state: function() {
-      if ($(this).htmleditable('selection') == null) {
-        return null;
-      }
+      if ($(this).htmleditable('selection') == null) return null;
       return {
         orderedList: document.queryCommandState('insertOrderedList'),
         unorderedList: document.queryCommandState('insertUnorderedList')
       };
     },
     command: function(ordered) {
+      console.log('command: list', ordered);
       return document.execCommand("insert" + (ordered ? 'Ordered' : 'Unordered') + "List");
     }
   };
+
 }).call(this);

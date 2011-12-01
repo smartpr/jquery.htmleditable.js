@@ -1,3 +1,7 @@
+/**
+This is I-Don't-Have-A-Fuckin-Clue-ware
+*/
+
 (function() {
 
   'use strict';
@@ -349,6 +353,271 @@
       }
     });
     return $(elements);
+  };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable["native"] = {
+    element: function(element) {
+      var _ref;
+      if (element != null) return;
+      if (this.is('p, div, br') && ((_ref = this.prop('scopeName')) === (void 0) || _ref === 'HTML')) {
+        return document.createElement(this[0].nodeName);
+      }
+      if (this.is(':header')) {
+        return function(element) {
+          if (element != null) return;
+          return document.createElement('p');
+        };
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.linebreaks = {
+    element: function(element) {
+      var _ref, _ref2, _ref3;
+      if (this.length === 0 || (element != null)) return;
+      if (this.is('br')) return document.createElement('br');
+      if (this.is('p, :header') && ((_ref = (_ref2 = this.prop('prefix')) != null ? _ref2 : this.prop('scopeName')) === (void 0) || _ref === null || _ref === 'HTML')) {
+        return function(element, children) {
+          if (element != null) return;
+          children.appendChild(document.createElement('br'));
+          children.appendChild(document.createElement('br'));
+        };
+      }
+      if ((_ref3 = this.css('display')) === 'block' || _ref3 === 'list-item' || _ref3 === 'table-row') {
+        return function(element, children) {
+          var last;
+          if (element != null) return;
+          last = children.lastChild;
+          while ((last != null) && last.nodeType === 3 && /^\s*$/.test(last.data)) {
+            last = last.previousSibling;
+          }
+          if (!$(last).is('br')) {
+            children.appendChild(document.createElement('br'));
+          }
+        };
+      }
+    },
+    init: function() {
+      return $('head').append("<style>			#" + (this.prop('id')) + " p {				margin-top: 0;				margin-bottom: 0;			}		</style>");
+    },
+    change: function() {
+      var sel;
+      if ($(this).find('div, p').length > 0) {
+        sel = rangy.saveSelection();
+        $(this).find('div').each(function() {
+          var prev;
+          prev = $(this)[0].previousSibling;
+          if ((prev != null) && !$(prev).is('br')) $(this).before('<br>');
+          return $(this).domSplice();
+        });
+        $(this).find('p').each(function() {
+          var _ref;
+          if (!(((_ref = $(this)[0].previousSibling) != null ? _ref.nodeType : void 0) === 1 && $(this).prev().is('br'))) {
+            $(this).after('<br>');
+          }
+          return $(this).domSplice();
+        });
+        return rangy.restoreSelection(sel);
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.singleline = {
+    condition: ['-multiline'],
+    init: function() {
+      return this.bind('keydown', 'return', function(e) {
+        return e.preventDefault();
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
+  /**
+  
+  Is defined in `$.htmleditable.base` and does some generic cleaning. Is enabled
+  by default. You usually wouldn't have to deal with this one.
+  */
+
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.base = {
+    input: function(html) {
+      return html.replace(/Version:[\d.]+\nStartHTML:\d+\nEndHTML:\d+\nStartFragment:\d+\nEndFragment:\d+/gi, '');
+    }
+  };
+
+}).call(this);
+(function() {
+  var $, name, tag;
+
+  $ = jQuery;
+
+  name = void 0;
+
+  tag = function() {
+    var $testbed, range;
+    if (name != null) return name;
+    $testbed = $('<div contenteditable="true" tabindex="-1" style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; overflow: hidden;">text</div>').prependTo('body');
+    range = rangy.createRange();
+    range.selectNodeContents($testbed[0]);
+    rangy.getSelection().setSingleRange(range);
+    document.execCommand('bold', null, null);
+    name = $testbed.children()[0].nodeName;
+    $testbed.remove();
+    return name != null ? name : 'b';
+  };
+
+  $.htmleditable.bold = {
+    element: function(element, children) {
+      if (this.length === 0 || (element != null)) return;
+      if (this.is('strong, b')) return document.createElement(tag());
+      if (this.is(':header') && $(children.childNodes).filter(tag()).length === 0) {
+        return function(element, children) {
+          var bold, child, next;
+          if ($(element).is(':header')) return;
+          bold = document.createElement(tag());
+          child = children.lastChild;
+          while (child != null) {
+            next = child.previousSibling;
+            if (bold.hasChildNodes() || !$(child).is('br') && (child.nodeType !== 3 || !/^\s*$/.test(child.data))) {
+              if (!bold.hasChildNodes()) children.insertBefore(bold, child);
+              bold.insertBefore(child, bold.firstChild);
+            }
+            child = next;
+          }
+        };
+      }
+    },
+    output: function($tree) {
+      return $tree.find(tag()).domSplice('<strong />');
+    },
+    state: function() {
+      if ($(this).htmleditable('selection') == null) return null;
+      return document.queryCommandState('bold');
+    },
+    hotkeys: {
+      'ctrl+b meta+b': []
+    },
+    command: function() {
+      return document.execCommand('bold', null, null);
+    }
+  };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.link = {
+    element: function(element) {
+      var link;
+      if (this.length === 0 || (element != null)) return;
+      if (this.is('a[href^="http://"]')) {
+        link = document.createElement('a');
+        link.setAttribute('href', this.attr('href'));
+        return link;
+      }
+    },
+    init: function() {},
+    state: function() {
+      var selection;
+      selection = $(this).htmleditable('selection');
+      if (selection == null) return null;
+      return $(selection.collapsed ? selection.commonAncestorContainer : selection.getNodes()).closest('a').get();
+    },
+    command: function(url) {
+      var selection;
+      selection = $(this).htmleditable('selection');
+      if (selection == null) return;
+      if (url == null) url = 'http://';
+      if (!selection.collapsed) {
+        return document.execCommand('createLink', null, url);
+      } else {
+        try {
+          return document.execCommand('insertHTML', null, "<a href=\"" + url + "\">" + url + "</a>");
+        } catch (err) {
+
+        }
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+  var $;
+
+  $ = jQuery;
+
+  $.htmleditable.list = {
+    element: function(element, children) {
+      var $child, child, list, name, next, _i, _len, _ref, _ref2, _ref3;
+      if (!this.is('ul, ol')) {
+        list = document.createElement('ul');
+        child = children.firstChild;
+        while (child != null) {
+          $child = $(child);
+          next = child.nextSibling;
+          if ($child.is('li')) {
+            if (!list.hasChildNodes()) children.insertBefore(list, child);
+            list.appendChild(child);
+            $child.html($child.html().replace(/^\S\.?(?:&nbsp;)+([\s\S]+)$/, "$1"));
+          } else if (list.hasChildNodes()) {
+            if (child.nodeType === 3 && /^\s*$/.test(child.data)) {
+              children.removeChild(child);
+            } else {
+              list = document.createElement('ul');
+            }
+          }
+          child = next;
+        }
+      }
+      if (this.length === 0) return;
+      _ref3 = (_ref = (_ref2 = this.attr('class')) != null ? _ref2.split(' ') : void 0) != null ? _ref : [];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        name = _ref3[_i];
+        if (/^MsoListParagraph\S*$/.test(name)) {
+          return document.createElement('li');
+        }
+      }
+      if (element != null) return;
+      if (this.is('ul, ol, li')) {
+        return document.createElement(this.prop('nodeName'));
+      }
+    },
+    state: function() {
+      if ($(this).htmleditable('selection') == null) return null;
+      return {
+        orderedList: document.queryCommandState('insertOrderedList'),
+        unorderedList: document.queryCommandState('insertUnorderedList')
+      };
+    },
+    command: function(ordered) {
+      console.log('command: list', ordered);
+      return document.execCommand("insert" + (ordered ? 'Ordered' : 'Unordered') + "List");
+    }
   };
 
 }).call(this);

@@ -1,12 +1,16 @@
 (function() {
   var $elem;
+
   $elem = void 0;
+
   beforeEach(function() {
     return $elem = $('#editable', fix);
   });
+
   afterEach(function() {
     return waits(0);
   });
+
   describe("$.fn.htmleditable()", function() {
     describe("init", function() {
       it("takes line mode and features", function() {
@@ -177,6 +181,7 @@
       });
     });
   });
+
   describe("events", function() {
     it("triggers change upon value change", function() {
       var handler;
@@ -201,6 +206,7 @@
       });
     });
   });
+
   xdescribe("$.fn.html() & $.fn.val()", function() {
     it("gets like $.fn.htmleditable('value')", function() {
       $elem.htmleditable();
@@ -213,6 +219,7 @@
       return expect($elem.val('Strong is the <strong>scrutiny</strong>!').val()).toBe('Strong is the scrutiny!');
     });
   });
+
   describe(":htmleditable", function() {
     it("does not match regular contenteditables", function() {
       return expect($('[contenteditable="true"]', fix)).not.toBe(':htmleditable');
@@ -221,4 +228,5 @@
       return expect($elem.htmleditable()).toBe(':htmleditable');
     });
   });
+
 }).call(this);

@@ -1,9 +1,12 @@
 (function() {
   var $elem;
+
   $elem = void 0;
+
   beforeEach(function() {
     return $elem = $('#editable', fix);
   });
+
   describe("$.htmleditable.multiline", function() {
     it("is enabled (and thus initialized) by default", function() {
       spyOn($.htmleditable.multiline, 'init');
@@ -19,4 +22,5 @@
       return expect($elem.htmleditable('value'), "<p>a</p><p>b</p>");
     });
   });
+
 }).call(this);

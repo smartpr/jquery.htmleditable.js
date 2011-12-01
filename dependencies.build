@@ -1,0 +1,4 @@
+lib/rangy-core.js
+lib/rangy-selectionsaverestore.js
+lib/jquery.pluginify.js
+lib/jquery.hotkeys.js

@@ -1,9 +1,12 @@
 (function() {
   var $elem;
+
   $elem = void 0;
+
   beforeEach(function() {
     return $elem = $('#editable', fix);
   });
+
   describe("$.htmleditable.bold", function() {
     describe("interprets headers", function() {
       it("makes headers bold", function() {
@@ -56,4 +59,5 @@
       return expect($.htmleditable.bold.command.callCount).toBe(2);
     });
   });
+
 }).call(this);
