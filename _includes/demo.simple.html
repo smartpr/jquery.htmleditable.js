@@ -1,55 +1,173 @@
 <style>
-  /* TODO: Is this an issue with Gecko, or with Firefox? */
-  html.gecko.mac #demo-simple {
-    outline: none;
-  }
-  /* TODO: Feature detect `appearance`, if feasible. */
-  html.msie #demo-simple {
-    border: 1px solid #7f9db9;
-  }
   #demo-simple {
+    position: relative;
+    overflow-y: hidden;
+    /* Give room for an outline on `.editable` */
+    padding: 5px;
+  }
+  #demo-simple > .tools {
+    position: absolute;
+    right: 5px;
+    /* Account for `.editable`'s bottom border */
+    bottom: 6px;
+    left: 5px;
+    height: 0;
+    overflow-y: hidden;
+    -webkit-transform: translateZ(0);
+    -webkit-transition: height .5s;
+  }
+  #demo-simple > .tools > * {
+    display: none;
+    position: absolute;
+    top: .5em;
+    right: .5em;
+    bottom: 0;
+    left: .5em;
+  }
+  #demo-simple > .tools input {
+    -webkit-appearance: caret;
+    background-color: LemonChiffon;
+  }
+  #demo-simple > .tools > .link a {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFZJREFUeF59z4EJADEIQ1F36k7u5E7ZKXeUQPACJ3wK7UNokVxVk9kHnQH7bY9hbDyDhNXgjpRLqFlo4M2GgfyJHhjq8V4agfrgPQX3JtJQGbofmCHgA/nAKks+JAjFAAAAAElFTkSuQmCC");
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding-left: 13px;
+    margin-left: .5em;
+    font-size: .8em;
+  }
+  #demo-simple > .tools > .all {
+    display: block;
+  }
+  #demo-simple > .tools.link > * {
+    display: none;
+  }
+  #demo-simple > .tools.link > .link {
+    display: block;
+  }
+  #demo-simple.active > .tools {
+    height: 2.5em;
+    /* Having the border on inactive state as well would mean that it will be
+       visible at all times, which is obviously not something we want. Having
+       it only on active state is technically not what we want either, because
+       it means that it will disappear before the transition that diminishes
+       the tools away has completed. But in practice this "flaw" is not
+       noticable (unless you pay real attention), so we don't deem it
+       worthwhile the added complexity of keeping the border until the
+       transition ends. */
+    border-top: 1px dashed Silver;
+  }
+  #demo-simple > .tools [data-command] {
+    margin-right: .3em;
+  }
+  #demo-simple > .tools [data-command].active {
+    color: rgb(87, 158, 212);
+    text-shadow: rgb(87, 158, 212) 0 0 .5em;
+  }
+  #demo-simple > .editable {
     -moz-appearance: textfield;
     -webkit-appearance: textfield;
     appearance: field;
+    /* TODO: Add this to other demos -- can we use a UA variable? */
+    background-color: White;
     overflow-x: auto;
-    width: 95%;
-    padding: .5em;
+    padding: .5em .5em 2.5em .5em;
   }
-  #demo-simple-tools {
-    margin-bottom: .5em;
+  #demo-simple > .editable a.editing {
+    background-color: LemonChiffon;
   }
-  #demo-simple-tools [data-command].active {
-    font-weight: bold;
+  /* Browsers that do not support `appearance` need some hardcoded styling to
+     make the htmleditable look like an editable element. */
+  html.no-appearance #demo-simple > .editable {
+    border: 1px solid;
+  }
+  /* On Windows the default styling of a textarea tends to be a blue'ish
+     border. */
+  html.no-appearance.win #demo-simple > .editable {
+    border-color: #7f9db9;
+  }
+  /* Mobile Safari will tell you that it supports `appearance`. In practice
+     though it seems to honor it only if a border is specified, and even then
+     only partially because it won't apply rounded corners. (Uhm yeah that's
+     crazy.) */
+  html.webkit.ios #demo-simple > .editable {
+    border: 1px solid;
+    -webkit-border-radius: 5px;
+  }
+  /* Firefox on Mac has some ugly quirk in which it displays two types of
+     outline at the same time; a Windows-style thin dotted line and a Mac-style
+     blue blurred line. By disabling outlining we lose the dotted line and keep
+     the blue one. */
+  html.firefox.mac #demo-simple > .editable {
+    outline-style: none;
   }
 </style>
 
-<div id="demo-simple-tools">
-  <button data-command="bold">Bold</button>
-</div>
 <div id="demo-simple">
-  <p>Yeah <b>this</b> was <strong>already</strong> in here...</p>
-  <p>Yup</p>
+  <div class="tools">
+    <div class="all">
+      <button data-command="bold" disabled="true">Bold</button>
+      <button data-command="italic" disabled="true">Italic</button>
+      <button data-command="ulist" disabled="true">Bulleted list</button>
+      <button data-command="olist" disabled="true">Numbered list</button>
+      <button data-command="link" disabled="true">Link</button>
+    </div>
+    <form class="link">
+      <label>
+        Links to:
+        <input type="url" />
+      </label>
+      <a href="">open in new window</a>
+    </form>
+  </div>
+  <div class="editable">
+    <p>Yeah <b>this</b> was <strong>already</strong> in here...</p>
+    <p>Yup and we can have <a href="http://smart.pr/">links</a> too!</p>
+  </div>
 </div>
 
 <script>
   jQuery(function($) {
 
-    $('#demo-simple').
+    var link = undefined;
+
+    $('#demo-simple > .editable').
       on('state', function(e, state) {
         for (key in state) {
-          $('#demo-simple-tools [data-command="' + key + '"]').
-            attr('disabled', state[key] === null)
+          $('#demo-simple > .tools [data-command="' + key + '"]').
+            prop('disabled', state[key] === null)
             [(state[key] === true ? 'add' : 'remove') + 'Class']('active');
+          if (state[key] !== null) {
+            $(link).removeClass('editing');
+            link = key === 'link' && $.isArray(state[key]) && state[key].length > 0 ? state[key][0] : undefined;
+            if (link) $(link).addClass('editing');
+            $('#demo-simple > .tools')[(link ? 'add' : 'remove') + 'Class']('link');
+          }
         }
+        setTimeout(function() {
+          var active = $('#demo-simple > .tools [data-command]:enabled').length > 0 || $('#demo-simple > .tools input:focus').length > 0;
+          $('#demo-simple')[(active ? 'add' : 'remove') + 'Class']('active');
+        });
       }).
       htmleditable('native', ['bold', 'link', 'list']);
     
-    $('#demo-simple-tools [data-command]').
+    $('#demo-simple > .tools').
       on('mousedown', function(e) {
-        e.preventDefault();
-      }).
+        if ($(e.target).is('input')) {
+          e.stopPropagation();
+        } else {
+          e.preventDefault();
+        }
+      });
+    $('#demo-simple > .tools [data-command]').
       on('click', function() {
-        $('#demo-simple').htmleditable('command', $(this).data('command'));
+        $('#demo-simple > .editable').htmleditable('command', $(this).data('command'));
+        if ($(this).data('command') === 'link') $('#demo-simple > .tools > .link input').focus();
+      });
+    $('#demo-simple > .tools > form.link').
+      on('submit', function(e) {
+        e.preventDefault();
+        $('#demo-simple > .editable').htmleditable('selection', link);
       });
     
   });

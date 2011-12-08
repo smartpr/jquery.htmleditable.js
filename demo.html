@@ -1,0 +1,198 @@
+---
+layout: base
+---
+
+<script>
+	Modernizr.
+		addTest('appearance', Modernizr.testAllProps('appearance')).
+		addTest('mac', /Mac/.test(navigator.platform)).
+		addTest('ios', /CPU (?:i\S+\s)?OS/.test(navigator.userAgent)).
+		addTest('win', /Win/.test(navigator.platform)).
+		addTest('webkit', /WebKit/.test(navigator.userAgent)).
+		addTest('firefox', /Firefox/.test(navigator.userAgent));
+</script>
+
+{% if site.compiled %}
+	<script src="{{ site.repository }}/raw/{{ site.version }}/jquery.htmleditable.standalone.min.js"></script>
+{% else %}
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-core.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/rangy-selectionsaverestore.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/jquery.pluginify.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/jquery.hotkeys.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/core.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/base.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/native.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/linebreaks.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/singleline.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/bold.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/link.js"></script>
+	<script src="{{ site.repository }}/raw/{{ site.version }}/lib/list.js"></script>
+{% endif %}
+
+
+<aside id="preview">
+	<h3>Live preview</h3>
+	<div class="content standout"></div>
+</aside>
+
+<article>
+
+{% comment %}
+
+This page is rendered as HTML with all Markdown being parsed by capturing and
+markdownifying it, because none of the available Markdown parsers is capable of
+parsing the contents of the demo files correctly. See the following issue
+reports for more information:
+
+*	[Maruku](https://github.com/nex3/maruku/issues/40)
+*	[kramdown](http://rubyforge.org/tracker/index.php?func=detail&aid=29426&
+	group_id=7403&atid=28673)
+
+{% endcomment %}
+
+{% capture intro %}
+## Demo
+
+Proof that <dfn>htmleditable</dfn> is Versatile -- yeah that's right, with a
+capital *V*.
+{% endcapture %}
+{{ intro | markdownify }}
+
+{% capture area %}
+### Rich text area
+
+It can be used as a `textarea` replacement, including resizing corner tip (in
+browsers that have them on text areas).
+{% endcapture %}
+{{ area | markdownify }}
+
+{% include demo.area.html %}
+<details>
+<summary>Source</summary>
+{% highlight html %}
+{% include demo.area.html %}
+{% endhighlight %}
+</details>
+
+{% capture input %}
+### Rich text input
+
+Similar to the rich text area, we can mimic a regular text input. Note the
+auto-resizing coolness!
+{% endcapture %}
+{{ input | markdownify }}
+
+{% include demo.input.html %}
+<details>
+<summary>Source</summary>
+{% highlight html %}
+{% include demo.input.html %}
+{% endhighlight %}
+</details>
+
+{% capture simple %}
+### Simple rich text editor
+
+Or leverage the fact that we are dealing with a regular block element and let
+it fit the content. (An entirely browser-powered auto-resizing text area, how
+cool is that?!)
+
+Designed to work well on all platforms, including iOS:
+
+*	does not rely on hotkeys; every feature can be interacted with using touch;
+*	puts the toolbar at the bottom, closest to where most editing is being
+	done and out of the way from the touch callouts that iOS displays when
+	moving the cursor inside the editable field.
+{% endcapture %}
+{{ simple | markdownify }}
+
+{% include demo.simple.html %}
+<details>
+<summary>Source</summary>
+{% highlight html %}
+{% include demo.simple.html %}
+{% endhighlight %}
+</details>
+
+{% capture traditional %}
+### Traditional rich text editor
+
+&hellip;
+{% endcapture %}
+{{ traditional | markdownify }}
+
+{% capture inline %}
+### Inline editing
+{% endcapture %}
+{{ inline | markdownify }}
+
+{% include demo.inline.html %}
+<details>
+<summary>Source</summary>
+{% highlight html %}
+{% include demo.inline.html %}
+{% endhighlight %}
+</details>
+
+</article>
+
+<script>
+	
+	jQuery(function($) {
+		
+		// Update the live preview.
+
+		$(':htmleditable').on('focus change', function() {
+			$('#preview > .content').html($(this).htmleditable('value'));
+		});
+
+		// Make the live preview always be within the viewport.
+
+		var $content = $('#preview > .content'),
+			$sticky = $content.clone(),
+			spacing = $content.offset().top - $content.prev().offset().top - $content.prev().outerHeight();
+		
+		// TODO: Shrink for footer -- would probably be best to work with
+		// section bottom instead of footer top.
+		var height = $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height());
+		$content.css({
+			'max-height': height
+		});
+		var height = $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height());
+		$sticky.css({
+			position: 'fixed',
+			top: spacing,
+			left: $content.offset().left,
+			width: $content.width(),
+			'max-height': height
+		}).hide().insertAfter($content);
+		
+		$(window).
+			on('scroll', function() {
+				var isStickyNeeded = $content.offset().top - $(document).scrollTop() <= spacing;
+				if ($sticky.is(':visible') !== isStickyNeeded) {
+					$sticky[isStickyNeeded ? 'show' : 'hide']();
+					$content.css('visibility', isStickyNeeded ? 'hidden' : '');
+				}
+				// TODO: Only do this when `$content` is visible.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
+			}).
+			on('resize', function() {
+				// Is being called when zooming as well.
+				// TODO: That is, in Chrome. Other browsers?
+				// TODO: Only update what's visible and if height has changed.
+				$content.css({
+					'max-height': $(window).height() - ($content.offset().top - $(document).scrollTop()) - spacing - ($content.outerHeight() - $content.height())
+				});
+				$sticky.css({
+					left: $content.offset().left,
+					width: $content.width(),
+					'max-height': $(window).height() - 2 * spacing - ($content.outerHeight() - $content.height())
+				});
+			});
+	
+	});
+
+</script>

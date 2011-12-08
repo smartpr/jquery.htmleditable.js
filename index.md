@@ -2,6 +2,8 @@
 layout: article
 ---
 
+## Overview
+
 Let's face it; [contenteditable](http://dev.w3.org/html5/spec/Overview.html#
 attr-contenteditable) is pretty cool but a major pain to work with.
 <dfn>htmleditable</dfn> is here to fix that by giving you an elegant API that

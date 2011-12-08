@@ -13,6 +13,9 @@ case $1 in
 dev)
 	jekyll --auto --pygments --safe --url http://dev/jquery.htmleditable.js/gh-pages/_site &
 	echo $! >> $PIDS_FILE
+	# Polling is very inefficient but necessary if the watched files are in a
+	# Dropbox environment. Its syncer (assumedly) removes and recreates files,
+	# which results in the watcher losing track of them.
 	compass watch --poll --environment development &
 	echo $! >> $PIDS_FILE
 	;;

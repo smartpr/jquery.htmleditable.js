@@ -1,7 +1,12 @@
 url: http://projects.smart.pr/jquery.htmleditable.js
 
+markdown: kramdown
 pygments: true
 repository: https://github.com/smartpr/jquery.htmleditable.js
 version: master
+
+# TODO: Switch these settings from `manage`.
 theme: http://projects.smart.pr/project-site.themes/smartpr-oss.css
 # theme: http://dev/project-site.themes/smartpr-oss.css
+compiled: true
+# compiled: false

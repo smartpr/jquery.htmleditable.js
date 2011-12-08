@@ -1,25 +1,7 @@
-@import "compass/css3";
-@import "compass/reset/utilities";
-
-// DEMO
-
-#preview {
-	& > h3 {
-		margin-top: 0;
-	}
-	& > .content {
-		padding: .5em;
-		background-color: LemonChiffon;
-		@include border-radius;
-		border: {
-			// Calculate color based on `background-color` using same darken
-			// parameters as used for code blocks.
-			top: 1px solid Khaki;
-			bottom: 1px solid Khaki;
-		}
-		overflow: {
-			x: auto;
-			y: auto;
-		}
+#preview > .content {
+	padding: .5em;
+	overflow: {
+		x: auto;
+		y: auto;
 	}
 }

@@ -11,13 +11,16 @@
 		<!-- Absolute paths everywhere so we can use this base for pages in
 		     subdirectories as well -->
 		<script src="{{ site.url }}/assets/modernizr.js"></script>
+		<script>
+			Modernizr.addTest('backgroundclip', Modernizr.testAllProps('background-clip'));
+		</script>
 
 		<link class="theme" rel="stylesheet" href="{{ site.theme }}" />
 		<link rel="stylesheet" href="{{ site.url }}/assets/site.css" />
 	</head>
 	<body>
 		<header>
-			<h1>jquery.htmleditable.js <span class="version">v{{ site.version }}</span></h1>
+			<h1>jquery.htmleditable.js <span class="version">{{ site.version }}</span></h1>
 			<h2>contenteditable’s missing API</h2>
 			<aside class="sponsor">
 				<p>
